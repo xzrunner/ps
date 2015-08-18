@@ -38,18 +38,21 @@ struct ps_color4f {
 	float a;
 };
 
-float ps_vec3_len(struct ps_vec3* vec) {
+static inline float 
+ps_vec3_len(struct ps_vec3* vec) {
 	return sqrt(vec->x * vec->x + vec->y * vec->y + vec->z * vec->z);
 }
 
-void ps_vec3_normalize(struct ps_vec3* vec) {
+static inline void 
+ps_vec3_normalize(struct ps_vec3* vec) {
 	float len = ps_vec3_len(vec);
 	vec->x /= len;
 	vec->y /= len;
 	vec->z /= len;
 }
 
-void ps_vec3_projection(const struct ps_vec3* pos3, struct ps_vec2* pos2) {
+static inline void 
+ps_vec3_projection(const struct ps_vec3* pos3, struct ps_vec2* pos2) {
 	float gx = pos3->x * 0.01f,
 		gy = pos3->y * 0.01f;
 
@@ -57,7 +60,8 @@ void ps_vec3_projection(const struct ps_vec3* pos3, struct ps_vec2* pos2) {
 	pos2->y = (gx + gy) * 26 + pos3->z * 0.5f;
 }
 
-float RANDOM_M11(unsigned int* seed) {
+static inline float 
+RANDOM_M11(unsigned int* seed) {
 	*seed = *seed * 134775813 + 1;
 	union {
 		uint32_t d;

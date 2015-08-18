@@ -125,8 +125,6 @@ ps_init(struct particle_system_3d* ps, int num) {
 
 	ps->life = ps->emit_counter = 0;
 	ps->active = ps->loop = false;
-
-	ps->cfg = (struct ps_cfg_3d*)(ps->end);
 }
 
 static inline void
@@ -142,7 +140,7 @@ _update_speed(struct particle_system_3d* ps, float dt, struct particle_3d* p) {
 	}
 
 	// disturbance
-	if (p->spd.z != 0 && p->pos.x > 0) {
+	if (p->spd.z != 0 && p->pos.z > 0) {
 		struct ps_vec3 dis_dir;
 		dis_dir.x = p->dis_dir.x;
 		dis_dir.y = p->dis_dir.y;
@@ -157,7 +155,7 @@ _update_speed(struct particle_system_3d* ps, float dt, struct particle_3d* p) {
 		if (p->dis_curr_len > p->cfg.dis_region) {
 			p->dis_dir.x = -p->dis_dir.x;
 			p->dis_dir.y = -p->dis_dir.y;
-			p->dis_curr_len -= p->cfg.dis_region;
+			p->dis_curr_len = -p->cfg.dis_region;
 		}
 	}
 }
@@ -174,7 +172,7 @@ _update_angle(struct particle_system_3d* ps, float dt, struct particle_3d* p) {
 		}
 		ps_vec3_projection(&pos, &pos_new);
 
-		p->angle = atan2f(pos_new.y - pos_old.y, pos_new.x - pos_old.x);
+		p->angle = atan2f(pos_new.y - pos_old.y, pos_new.x - pos_old.x) - PI * 0.5f;
 	} else {
 		if (p->pos.z > 0.1f) {
 			p->angle += p->cfg.angular_spd * dt;
@@ -194,6 +192,7 @@ _update_position(struct particle_system_3d* ps, float dt, struct particle_3d* p)
 			p->spd.y *= 0.4f;
 			p->spd.z *= -0.2f;
 		} else {
+			p->pos.z = 0;
 			memset(p->spd.xyz, 0, sizeof(p->spd));
 		}
 	}

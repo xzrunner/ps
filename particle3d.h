@@ -16,8 +16,8 @@ struct particle_symbol {
 	float scale_start, scale_end;
 
 	float angle, angle_var;
-	struct ps_color4f col_mul, col_add;
 
+	struct ps_color4f col_mul, col_add;
 	float alpha_start, alpha_end;
 
 	struct ps_cfg_3d* bind_ps_cfg;
@@ -93,12 +93,12 @@ struct ps_cfg_3d {
 
 	bool orient_to_movement;
 
-	struct particle_symbol* symbols;
-	int symbol_count;
-
 	struct ps_vec3 dir;
 
 	// todo: additive_blend, inertia
+
+	int symbol_count;
+	struct particle_symbol* symbols;
 };
 
 struct particle_system_3d {
