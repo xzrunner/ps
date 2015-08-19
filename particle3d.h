@@ -60,6 +60,9 @@ struct particle_3d {
 
 	float angle;
 
+	// 创建时发射器的状态
+	struct ps_vec2 init_pos;
+
 	struct particle_system_3d* bind_ps;
 };
 
@@ -109,6 +112,9 @@ struct particle_system_3d {
 
 	bool active;
 	bool loop;
+
+	void (*add_func)(struct particle_3d*);
+	void (*remove_func)(struct particle_3d*);
 
 	struct ps_cfg_3d* cfg;
 };

@@ -59,7 +59,7 @@ _trans_coords2d(float r, float hori, struct ps_vec3* pos) {
 
 static inline void
 _add(struct particle_system_3d* ps) {
-	if (_is_full(ps)) {
+	if (_is_full(ps) || !ps->cfg->symbol_count) {
 		return;
 	}
 
@@ -106,13 +106,18 @@ _add(struct particle_system_3d* ps) {
 		p->bind_ps = NULL;
 	}
 
+	if (ps->add_func) {
+		ps->add_func(p);
+	}
+
 	ps->last++;
 }
 
 static inline void
 _remove(struct particle_system_3d* ps, struct particle_3d* p) {
-	// todo: inv_record
-
+	if (ps->remove_func) {
+		ps->remove_func(p);
+	}
 	if (!_is_empty(ps)) {
 		*p = *(--ps->last);
 	}
