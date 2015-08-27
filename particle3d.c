@@ -27,7 +27,6 @@ _pause(struct particle_system_3d* ps) {
 static inline void
 _stop(struct particle_system_3d* ps) {
 	_pause(ps);
-	ps->life = ps->cfg->lifetime;
 	ps->emit_counter = 0;
 }
 
@@ -128,7 +127,7 @@ ps_init(struct particle_system_3d* ps, int num) {
 	ps->last = ps->start = (struct particle_3d*)(ps + 1);
 	ps->end = ps->last + num;
 
-	ps->life = ps->emit_counter = 0;
+	ps->emit_counter = 0;
 	ps->active = ps->loop = false;
 }
 
@@ -206,17 +205,23 @@ _update_position(struct particle_system_3d* ps, float dt, struct particle_3d* p)
 void 
 ps_update(struct particle_system_3d* ps, float dt) {
 	if (ps->active) {
-		float rate = ps->cfg->emission_time / ps->cfg->count;
-		ps->emit_counter += dt;
-		while (ps->emit_counter > rate) {
-			_add(ps);
-			ps->emit_counter -= rate;
-		}
-		if (!ps->loop) {
-			ps->life -= dt;
-			if (ps->life < 0) {
-				_stop(ps);
+		if (ps->loop) {
+			float rate = ps->cfg->emission_time / ps->cfg->count;
+			ps->emit_counter += dt;
+			while (ps->emit_counter > rate) {
+				_add(ps);
+				ps->emit_counter -= rate;
 			}
+		} else {
+			for (int i = 0; i < ps->cfg->count; ++i) {
+				_add(ps);
+			}
+			_stop(ps);
+
+// 			ps->life -= dt;
+// 			if (ps->life < 0) {
+// 				_stop(ps);
+// 			}
 		}
 	}
 

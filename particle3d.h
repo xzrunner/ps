@@ -67,7 +67,7 @@ struct particle_3d {
 };
 
 struct ps_cfg_3d {
-	float lifetime;
+//	float lifetime;
 
 	float emission_time;
 	int count;
@@ -107,7 +107,7 @@ struct ps_cfg_3d {
 struct particle_system_3d {
 	struct particle_3d *start, *last, *end;
 
-	float life;
+//	float life;
 	float emit_counter;
 
 	bool active;
