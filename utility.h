@@ -38,17 +38,36 @@ struct ps_color4f {
 	float a;
 };
 
+static inline void 
+ps_vec2_normalize(struct ps_vec2* p) {
+	float len2 = p->x * p->x + p->y * p->y;
+	if (len2 == 0) {
+		p->x = 1;
+		p->y = 0;
+	} else {
+		float len = sqrtf(len2);
+		p->x /= len;
+		p->y /= len;
+	}
+}
+
 static inline float 
-ps_vec3_len(struct ps_vec3* vec) {
-	return sqrt(vec->x * vec->x + vec->y * vec->y + vec->z * vec->z);
+ps_vec3_len(struct ps_vec3* p) {
+	return sqrt(p->x * p->x + p->y * p->y + p->z * p->z);
 }
 
 static inline void 
-ps_vec3_normalize(struct ps_vec3* vec) {
-	float len = ps_vec3_len(vec);
-	vec->x /= len;
-	vec->y /= len;
-	vec->z /= len;
+ps_vec3_normalize(struct ps_vec3* p) {
+	float len2 = p->x * p->x + p->y * p->y + p->z * p->z;
+	if (len2 == 0) {
+		p->x = 1;
+		p->y = p->z = 0;
+	} else {
+		float len = sqrtf(len2);
+		p->x /= len;
+		p->y /= len;
+		p->z /= len;
+	}
 }
 
 static inline void 

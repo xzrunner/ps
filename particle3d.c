@@ -237,7 +237,7 @@ ps_update(struct particle_system_3d* ps, float dt) {
 			_update_speed(ps, dt, p);
 			_update_angle(ps, dt, p);
 			_update_position(ps, dt, p);
-			p++;
+			++p;
 		} else {
 			_remove(ps, p);
 			if (p >= ps->last) {
