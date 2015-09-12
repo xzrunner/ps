@@ -53,7 +53,7 @@ ps_vec2_normalize(struct ps_vec2* p) {
 
 static inline float 
 ps_vec3_len(struct ps_vec3* p) {
-	return sqrt(p->x * p->x + p->y * p->y + p->z * p->z);
+	return sqrtf(p->x * p->x + p->y * p->y + p->z * p->z);
 }
 
 static inline void 
