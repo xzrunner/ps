@@ -4,13 +4,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct particle_system_3d* 
-ps_create(int num, struct ps_cfg_3d* cfg) {
-	int sz = sizeof(struct particle_system_3d) + num * (sizeof(struct particle_3d));
-	struct particle_system_3d* ps = (struct particle_system_3d*)malloc(sz);
+struct p3d_particle_system* 
+p3d_create(int num, struct p3d_ps_config* cfg) {
+	int sz = sizeof(struct p3d_particle_system) + num * (sizeof(struct p3d_particle));
+	struct p3d_particle_system* ps = (struct p3d_particle_system*)malloc(sz);
 	memset(ps, 0, sz);
 	ps->cfg = cfg;
-	ps_init(ps, num);
+	p3d_init(ps, num);
 	return ps;
 }
 
@@ -20,23 +20,23 @@ ps_create(int num, struct ps_cfg_3d* cfg) {
 // }
 
 static inline void
-_pause(struct particle_system_3d* ps) {
+_pause(struct p3d_particle_system* ps) {
 	ps->active = false;
 }
 
 static inline void
-_stop(struct particle_system_3d* ps) {
+_stop(struct p3d_particle_system* ps) {
 	_pause(ps);
 	ps->emit_counter = 0;
 }
 
 static inline bool 
-_is_full(struct particle_system_3d* ps) {
+_is_full(struct p3d_particle_system* ps) {
 	return ps->last == ps->end;	
 }
 
 static inline bool
-_is_empty(struct particle_system_3d* ps) {
+_is_empty(struct p3d_particle_system* ps) {
 	return ps->start == ps->last;
 }
 
@@ -57,16 +57,16 @@ _trans_coords2d(float r, float hori, struct ps_vec3* pos) {
 }
 
 static inline void
-_add(struct particle_system_3d* ps) {
+_add(struct p3d_particle_system* ps) {
 	if (_is_full(ps) || !ps->cfg->symbol_count) {
 		return;
 	}
 
-	struct particle_3d* p = ps->last;
+	struct p3d_particle* p = ps->last;
 
 	uint32_t RANDSEED = rand();
 
-	p->cfg.symbol = (struct particle_symbol*)(ps->cfg->symbols + RANDSEED % ps->cfg->symbol_count);
+	p->cfg.symbol = (struct p3d_symbol*)(ps->cfg->symbols + RANDSEED % ps->cfg->symbol_count);
 
 	p->life = ps->cfg->life + ps->cfg->life_var * RANDOM_M11(&RANDSEED);
 	p->cfg.lifetime = p->life;
@@ -99,7 +99,7 @@ _add(struct particle_system_3d* ps) {
 
 	if (p->cfg.symbol->bind_ps_cfg) {
 		int num = ps->end - ps->start;
-		p->bind_ps = ps_create(num, p->cfg.symbol->bind_ps_cfg);
+		p->bind_ps = p3d_create(num, p->cfg.symbol->bind_ps_cfg);
 	} else if (p->bind_ps) {
 		free(p->bind_ps);
 		p->bind_ps = NULL;
@@ -113,7 +113,7 @@ _add(struct particle_system_3d* ps) {
 }
 
 static inline void
-_remove(struct particle_system_3d* ps, struct particle_3d* p) {
+_remove(struct p3d_particle_system* ps, struct p3d_particle* p) {
 	if (ps->remove_func) {
 		ps->remove_func(p);
 	}
@@ -123,8 +123,8 @@ _remove(struct particle_system_3d* ps, struct particle_3d* p) {
 }
 
 void 
-ps_init(struct particle_system_3d* ps, int num) {
-	ps->last = ps->start = (struct particle_3d*)(ps + 1);
+p3d_init(struct p3d_particle_system* ps, int num) {
+	ps->last = ps->start = (struct p3d_particle*)(ps + 1);
 	ps->end = ps->last + num;
 
 	ps->emit_counter = 0;
@@ -132,7 +132,7 @@ ps_init(struct particle_system_3d* ps, int num) {
 }
 
 static inline void
-_update_speed(struct particle_system_3d* ps, float dt, struct particle_3d* p) {
+_update_speed(struct p3d_particle_system* ps, float dt, struct p3d_particle* p) {
 	// gravity
 	p->spd.z -= ps->cfg->gravity * dt;
 
@@ -165,7 +165,7 @@ _update_speed(struct particle_system_3d* ps, float dt, struct particle_3d* p) {
 }
 
 static inline void
-_update_angle(struct particle_system_3d* ps, float dt, struct particle_3d* p) {
+_update_angle(struct p3d_particle_system* ps, float dt, struct p3d_particle* p) {
 	if (ps->cfg->orient_to_movement) {
 		struct ps_vec2 pos_old, pos_new;
 		ps_vec3_projection(&p->pos, &pos_old);
@@ -185,7 +185,7 @@ _update_angle(struct particle_system_3d* ps, float dt, struct particle_3d* p) {
 }
 
 static inline void
-_update_position(struct particle_system_3d* ps, float dt, struct particle_3d* p) {
+_update_position(struct p3d_particle_system* ps, float dt, struct p3d_particle* p) {
 	for (int i = 0; i < 3; ++i) {
 		p->pos.xyz[i] += p->spd.xyz[i] * dt;
 	}
@@ -203,7 +203,7 @@ _update_position(struct particle_system_3d* ps, float dt, struct particle_3d* p)
 }
 
 void 
-ps_update(struct particle_system_3d* ps, float dt) {
+p3d_update(struct p3d_particle_system* ps, float dt) {
 	if (ps->active) {
 		if (ps->loop) {
 			float rate = ps->cfg->emission_time / ps->cfg->count;
@@ -225,10 +225,10 @@ ps_update(struct particle_system_3d* ps, float dt) {
 		}
 	}
 
-	struct particle_3d* p = ps->start;
+	struct p3d_particle* p = ps->start;
 	while (p != ps->last) {
 		if (p->bind_ps) {
-			ps_update(p->bind_ps, dt);
+			p3d_update(p->bind_ps, dt);
 		}
 
 		p->life -= dt;

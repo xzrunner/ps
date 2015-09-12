@@ -10,9 +10,9 @@ extern "C"
 
 #include "utility.h"
 
-struct ps_cfg_3d;
+struct p3d_ps_config;
 
-struct particle_symbol {
+struct p3d_symbol {
 	float scale_start, scale_end;
 
 	float angle, angle_var;
@@ -20,12 +20,12 @@ struct particle_symbol {
 	struct ps_color4f col_mul, col_add;
 	float alpha_start, alpha_end;
 
-	struct ps_cfg_3d* bind_ps_cfg;
+	struct p3d_ps_config* bind_ps_cfg;
 
 	void* ud;
 };
 
-struct particle_cfg {
+struct p3d_particle_cfg {
 	float lifetime;
 
 	struct ps_vec2 dir;
@@ -41,13 +41,13 @@ struct particle_cfg {
 	float dis_spd;
 	float dis_region;
 
-	struct particle_symbol* symbol;
+	struct p3d_symbol* symbol;
 };
 
-struct particle_3d {
+struct p3d_particle {
 	//	struct ps_vec2 pos;
 
-	struct particle_cfg cfg;
+	struct p3d_particle_cfg cfg;
 
 	float life;
 
@@ -63,10 +63,10 @@ struct particle_3d {
 	// 创建时发射器的状态
 	struct ps_vec2 init_pos;
 
-	struct particle_system_3d* bind_ps;
+	struct p3d_particle_system* bind_ps;
 };
 
-struct ps_cfg_3d {
+struct p3d_ps_config {
 //	float lifetime;
 
 	float emission_time;
@@ -101,11 +101,11 @@ struct ps_cfg_3d {
 	// todo: additive_blend, inertia
 
 	int symbol_count;
-	struct particle_symbol* symbols;
+	struct p3d_symbol* symbols;
 };
 
-struct particle_system_3d {
-	struct particle_3d *start, *last, *end;
+struct p3d_particle_system {
+	struct p3d_particle *start, *last, *end;
 
 //	float life;
 	float emit_counter;
@@ -113,15 +113,15 @@ struct particle_system_3d {
 	bool active;
 	bool loop;
 
-	void (*add_func)(struct particle_3d*);
-	void (*remove_func)(struct particle_3d*);
+	void (*add_func)(struct p3d_particle*);
+	void (*remove_func)(struct p3d_particle*);
 
-	struct ps_cfg_3d* cfg;
+	struct p3d_ps_config* cfg;
 };
 
-struct particle_system_3d* ps_create(int num, struct ps_cfg_3d* cfg);
-void ps_init(struct particle_system_3d* ps, int num);
-void ps_update(struct particle_system_3d* ps, float dt);
+struct p3d_particle_system* p3d_create(int num, struct p3d_ps_config* cfg);
+void p3d_init(struct p3d_particle_system* ps, int num);
+void p3d_update(struct p3d_particle_system* ps, float dt);
 
 #endif // particle3d_h
 
