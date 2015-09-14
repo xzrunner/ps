@@ -7,7 +7,7 @@
 void 
 _ps_init(struct p3d_particle_system* ps, int num) {
 	ps->last = ps->start = (struct p3d_particle*)(ps + 1);
-	ps->end = ps->last + num;
+	ps->end = ps->start + num;
 
 	ps->emit_counter = 0;
 	ps->active = ps->loop = false;
