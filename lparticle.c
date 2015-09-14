@@ -1,5 +1,6 @@
 #include "particle3d.h"
 #include "sprite.h"
+#include "spritepack.h"
 
 #include "lua.h"
 #include "lauxlib.h"
@@ -10,6 +11,7 @@ lp3d_release(lua_State* L) {
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
 	struct p3d_particle_system* ps = spr->s.p3d->spr.ps;
 	p3d_release(ps);
+	spr->s.p3d->spr.ps = NULL;
 	return 0;
 }
 
