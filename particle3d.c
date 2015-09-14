@@ -29,6 +29,16 @@ p3d_release(struct p3d_particle_system* ps)
 	free(ps);
 }
 
+struct p3d_particle_system* 
+p3d_create_with_mem(void* mem, int num, struct p3d_ps_config* cfg) {
+	int sz = sizeof(struct p3d_particle_system) + num * (sizeof(struct p3d_particle));
+	struct p3d_particle_system* ps = (struct p3d_particle_system*)mem;
+	memset(ps, 0, sz);
+	ps->cfg = cfg;
+	_ps_init(ps, num);
+	return ps;
+}
+
 // static inline void
 // _resume(struct particle_system_3d* ps) {
 // 	ps->active = true;
