@@ -4,23 +4,23 @@
 #include <stdlib.h>
 #include <string.h>
 
+static inline void 
+_ps_init(struct p2d_particle_system* ps, int num) {
+	ps->last = ps->start = (struct p2d_particle*)(ps + 1);
+	ps->end = ps->last + num;
+
+	ps->emit_counter = 0;
+	ps->is_active = ps->is_loop = false;
+}
+
 struct p2d_particle_system* 
 p2d_create(int num, struct p2d_ps_config* cfg) {
 	int sz = sizeof(struct p2d_particle_system) + num * (sizeof(struct p2d_particle));
 	struct p2d_particle_system* ps = (struct p2d_particle_system*)malloc(sz);
 	memset(ps, 0, sz);
 	ps->cfg = cfg;
-	p2d_init(ps, num);
+	_ps_init(ps, num);
 	return ps;
-}
-
-void 
-p2d_init(struct p2d_particle_system* ps, int num) {
-	ps->last = ps->start = (struct p2d_particle*)(ps + 1);
-	ps->end = ps->last + num;
-
-	ps->emit_counter = 0;
-	ps->is_active = ps->is_loop = false;
 }
 
 static inline void
