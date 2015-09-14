@@ -120,7 +120,8 @@ struct p3d_particle_system {
 };
 
 struct p3d_particle_system* p3d_create(int num, struct p3d_ps_config* cfg);
-void p3d_init(struct p3d_particle_system* ps, int num);
+void p3d_release(struct p3d_particle_system* ps);
+
 void p3d_update(struct p3d_particle_system* ps, float dt);
 
 #endif // particle3d_h

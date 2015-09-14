@@ -23,6 +23,11 @@ p2d_create(int num, struct p2d_ps_config* cfg) {
 	return ps;
 }
 
+void 
+p2d_release(struct p2d_particle_system* ps) {
+	free(ps);
+}
+
 static inline void
 _pause(struct p2d_particle_system* ps) {
 	ps->is_active = false;

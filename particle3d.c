@@ -4,14 +4,29 @@
 #include <stdlib.h>
 #include <string.h>
 
+void 
+_ps_init(struct p3d_particle_system* ps, int num) {
+	ps->last = ps->start = (struct p3d_particle*)(ps + 1);
+	ps->end = ps->last + num;
+
+	ps->emit_counter = 0;
+	ps->active = ps->loop = false;
+}
+
 struct p3d_particle_system* 
 p3d_create(int num, struct p3d_ps_config* cfg) {
 	int sz = sizeof(struct p3d_particle_system) + num * (sizeof(struct p3d_particle));
 	struct p3d_particle_system* ps = (struct p3d_particle_system*)malloc(sz);
 	memset(ps, 0, sz);
 	ps->cfg = cfg;
-	p3d_init(ps, num);
+	_ps_init(ps, num);
 	return ps;
+}
+
+void 
+p3d_release(struct p3d_particle_system* ps)
+{
+	free(ps);
 }
 
 // static inline void
@@ -120,15 +135,6 @@ _remove(struct p3d_particle_system* ps, struct p3d_particle* p) {
 	if (!_is_empty(ps)) {
 		*p = *(--ps->last);
 	}
-}
-
-void 
-p3d_init(struct p3d_particle_system* ps, int num) {
-	ps->last = ps->start = (struct p3d_particle*)(ps + 1);
-	ps->end = ps->last + num;
-
-	ps->emit_counter = 0;
-	ps->active = ps->loop = false;
 }
 
 static inline void
