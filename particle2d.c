@@ -64,7 +64,7 @@ static inline void
 _init_mode_radius(struct p2d_particle_system* ps, struct p2d_particle* p, uint32_t* rand) {
 	float dir = ps->cfg->direction + ps->cfg->direction_var * RANDOM_M11(rand);
 	p->mode.B.direction = dir;
-	p->mode.B.direction_delta = ps->cfg->mode.B.radius_delta + ps->cfg->mode.B.radius_delta_var * RANDOM_M11(rand);
+	p->mode.B.direction_delta = ps->cfg->mode.B.direction_delta + ps->cfg->mode.B.direction_delta_var * RANDOM_M11(rand);
 
 	float start_radius = ps->cfg->mode.B.start_radius + ps->cfg->mode.B.start_radius_var * RANDOM_M11(rand);
 	float end_radius = ps->cfg->mode.B.end_radius + ps->cfg->mode.B.end_radius_var * RANDOM_M11(rand);
@@ -83,7 +83,6 @@ _init_mode_spd_cos(struct p2d_particle_system* ps, struct p2d_particle* p, uint3
 
 	p->mode.C.cos_amplitude = ps->cfg->mode.C.cos_amplitude + ps->cfg->mode.C.cos_amplitude_var * RANDOM_M11(rand);
 	p->mode.C.cos_frequency = ps->cfg->mode.C.cos_frequency + ps->cfg->mode.C.cos_frequency_var * RANDOM_M11(rand);
-
 }
 
 static inline void
@@ -98,11 +97,21 @@ _init_particle(struct p2d_particle_system* ps, struct p2d_particle* p) {
 	p->position.y = ps->cfg->position.y + ps->cfg->position_var.y * RANDOM_M11(&RANDSEED);
 	p->position_ori = p->position;
 
+	float k = 1 / p->life;
+
 	p->angle = p->symbol->angle_start;
+	p->angle_delta = (p->symbol->angle_end - p->symbol->angle_start) * k;
+
 	p->scale = p->symbol->scale_start;
+	p->scale_delta = (p->symbol->scale_end - p->symbol->scale_start) * k;
 
 	p->col_mul = p->symbol->col_mul_start;
+	ps_color_sub(&p->symbol->col_mul_end, &p->symbol->col_mul_start, &p->col_mul_delta);
+	ps_color_mul(&p->col_mul_delta, k);
+
 	p->col_add = p->symbol->col_add_start;
+	ps_color_sub(&p->symbol->col_add_end, &p->symbol->col_add_start, &p->col_add_delta);
+	ps_color_mul(&p->col_add_delta, k);
 
 	if (ps->cfg->mode_type == P2D_MODE_GRAVITY) {
 		_init_mode_gravity(ps, p, &RANDSEED);
@@ -175,19 +184,19 @@ _update_mode_spd_cos(struct p2d_particle_system* ps, float dt, struct p2d_partic
 
 static inline void
 _update(struct p2d_particle_system* ps, float dt, struct p2d_particle* p) {
-	p->angle += p->symbol->angle_delta * dt;
+	p->angle += p->angle_delta * dt;
 
-	p->scale += p->symbol->scale_delta * dt;
+	p->scale += p->scale_delta * dt;
 
-	p->col_mul.r += p->symbol->col_mul_delta.r * dt;
-	p->col_mul.g += p->symbol->col_mul_delta.g * dt;
-	p->col_mul.b += p->symbol->col_mul_delta.b * dt;
-	p->col_mul.a += p->symbol->col_mul_delta.a * dt;
+	p->col_mul.r += p->col_mul_delta.r * dt;
+	p->col_mul.g += p->col_mul_delta.g * dt;
+	p->col_mul.b += p->col_mul_delta.b * dt;
+	p->col_mul.a += p->col_mul_delta.a * dt;
 
-	p->col_add.r += p->symbol->col_add_delta.r * dt;
-	p->col_add.g += p->symbol->col_add_delta.g * dt;
-	p->col_add.b += p->symbol->col_add_delta.b * dt;
-	p->col_add.a += p->symbol->col_add_delta.a * dt;
+	p->col_add.r += p->col_add_delta.r * dt;
+	p->col_add.g += p->col_add_delta.g * dt;
+	p->col_add.b += p->col_add_delta.b * dt;
+	p->col_add.a += p->col_add_delta.a * dt;
 
 	if (ps->cfg->mode_type == P2D_MODE_GRAVITY) {
 		_update_mode_gravity(ps, dt, p);

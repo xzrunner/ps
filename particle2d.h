@@ -15,12 +15,12 @@ extern "C"
 #define P2D_MODE_SPD_COS	2
 
 struct p2d_symbol {
-	float angle_start, angle_delta;
+	float angle_start, angle_end;
 
-	float scale_start, scale_delta;
+	float scale_start, scale_end;
 
-	struct ps_color4f col_mul_start, col_mul_delta;
-	struct ps_color4f col_add_start, col_add_delta;
+	struct ps_color4f col_mul_start, col_mul_end;
+	struct ps_color4f col_add_start, col_add_end;
 
 	void* ud;
 };
@@ -32,11 +32,10 @@ struct p2d_particle {
 
 	struct ps_vec2 position, position_ori;
 
-	float angle;
-
-	float scale;
-
-	struct ps_color4f col_mul, col_add;
+	float angle, angle_delta;
+	float scale, scale_delta;
+	struct ps_color4f col_mul, col_mul_delta;
+	struct ps_color4f col_add, col_add_delta;
 
 	union {
 		struct {
@@ -79,7 +78,7 @@ struct p2d_ps_config {
 			float start_radius, start_radius_var;
 			float end_radius, end_radius_var;
 
-			float radius_delta, radius_delta_var;
+			float direction_delta, direction_delta_var;
 		} B;
 
 		// tangential spd cos

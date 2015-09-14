@@ -79,6 +79,23 @@ ps_vec3_projection(const struct ps_vec3* pos3, struct ps_vec2* pos2) {
 	pos2->y = (gx + gy) * 26 + pos3->z * 0.5f;
 }
 
+static inline void
+ps_color_sub(const struct ps_color4f* start, const struct ps_color4f* end, 
+			 struct ps_color4f* ret) {
+	ret->r = end->r - start->r;
+	ret->g = end->g - start->g;
+	ret->b = end->b - start->b;
+	ret->a = end->a - start->a;
+}
+
+static inline void
+ps_color_mul(struct ps_color4f* ori, float mul) {
+	ori->r *= mul;
+	ori->g *= mul;
+	ori->b *= mul;
+	ori->a *= mul;
+}
+
 static inline float 
 RANDOM_M11(unsigned int* seed) {
 	*seed = *seed * 134775813 + 1;
