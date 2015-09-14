@@ -68,11 +68,11 @@ _add(struct p3d_particle_system* ps) {
 
 	p->cfg.symbol = (struct p3d_symbol*)(ps->cfg->symbols + RANDSEED % ps->cfg->symbol_count);
 
-	p->life = ps->cfg->life + ps->cfg->life_var * RANDOM_M11(&RANDSEED);
+	p->life = ps->cfg->life + ps->cfg->life_var * ps_random_m11(&RANDSEED);
 	p->cfg.lifetime = p->life;
 	
-	p->cfg.dir.x = ps->cfg->hori + ps->cfg->hori_var * RANDOM_M11(&RANDSEED);
-	p->cfg.dir.y = ps->cfg->vert + ps->cfg->vert_var * RANDOM_M11(&RANDSEED);
+	p->cfg.dir.x = ps->cfg->hori + ps->cfg->hori_var * ps_random_m11(&RANDSEED);
+	p->cfg.dir.y = ps->cfg->vert + ps->cfg->vert_var * ps_random_m11(&RANDSEED);
 
 	if (ps->cfg->is_start_radius_3d) {
 		_trans_coords3d(ps->cfg->start_radius, p->cfg.dir.x, p->cfg.dir.y, &p->pos);
@@ -80,22 +80,22 @@ _add(struct p3d_particle_system* ps) {
 		_trans_coords2d(ps->cfg->start_radius, p->cfg.dir.x, &p->pos);
 	}
 
-	float spd = ps->cfg->spd + ps->cfg->spd_var * RANDOM_M11(&RANDSEED);
+	float spd = ps->cfg->spd + ps->cfg->spd_var * ps_random_m11(&RANDSEED);
 	_trans_coords3d(spd, p->cfg.dir.x, p->cfg.dir.y, &p->spd);
 	memcpy(&p->cfg.spd_dir, &p->spd, sizeof(p->spd));
 
-	p->cfg.dis_region = ps->cfg->dis_region + ps->cfg->dis_region_var * RANDOM_M11(&RANDSEED);
+	p->cfg.dis_region = ps->cfg->dis_region + ps->cfg->dis_region_var * ps_random_m11(&RANDSEED);
 	p->dis_curr_len = 0;
-	float dis_angle = PI * RANDOM_M11(&RANDSEED);
+	float dis_angle = PI * ps_random_m11(&RANDSEED);
 	p->dis_dir.x = cosf(dis_angle);
 	p->dis_dir.y = sinf(dis_angle);
-	p->cfg.dis_spd = ps->cfg->dis_spd + ps->cfg->dis_spd_var * RANDOM_M11(&RANDSEED);
+	p->cfg.dis_spd = ps->cfg->dis_spd + ps->cfg->dis_spd_var * ps_random_m11(&RANDSEED);
 
-	p->cfg.linear_acc = ps->cfg->linear_acc + ps->cfg->linear_acc_var * RANDOM_M11(&RANDSEED);
+	p->cfg.linear_acc = ps->cfg->linear_acc + ps->cfg->linear_acc_var * ps_random_m11(&RANDSEED);
 
-	p->cfg.angular_spd = ps->cfg->angular_spd + ps->cfg->angular_spd_var * RANDOM_M11(&RANDSEED);
+	p->cfg.angular_spd = ps->cfg->angular_spd + ps->cfg->angular_spd_var * ps_random_m11(&RANDSEED);
 
-	p->angle = p->cfg.symbol->angle + p->cfg.symbol->angle_var * RANDOM_M11(&RANDSEED);
+	p->angle = p->cfg.symbol->angle + p->cfg.symbol->angle_var * ps_random_m11(&RANDSEED);
 
 	if (p->cfg.symbol->bind_ps_cfg) {
 		int num = ps->end - ps->start;

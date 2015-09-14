@@ -97,7 +97,7 @@ ps_color_mul(struct ps_color4f* ori, float mul) {
 }
 
 static inline float 
-RANDOM_M11(unsigned int* seed) {
+ps_random_m11(unsigned int* seed) {
 	*seed = *seed * 134775813 + 1;
 	union {
 		uint32_t d;

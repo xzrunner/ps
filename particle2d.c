@@ -46,14 +46,14 @@ _is_empty(struct p2d_particle_system* ps) {
 
 static inline void
 _init_mode_gravity(struct p2d_particle_system* ps, struct p2d_particle* p, uint32_t* rand) {
-	float dir = ps->cfg->direction + ps->cfg->direction_var * RANDOM_M11(rand);
-	float speed = ps->cfg->mode.A.speed + ps->cfg->mode.A.speed_var * RANDOM_M11(rand);
+	float dir = ps->cfg->direction + ps->cfg->direction_var * ps_random_m11(rand);
+	float speed = ps->cfg->mode.A.speed + ps->cfg->mode.A.speed_var * ps_random_m11(rand);
 	p->mode.A.speed.x = cosf(dir) * speed;
 	p->mode.A.speed.y = sinf(dir) * speed;
 
-	p->mode.A.tangential_accel = ps->cfg->mode.A.tangential_accel + ps->cfg->mode.A.tangential_accel_var * RANDOM_M11(rand);
+	p->mode.A.tangential_accel = ps->cfg->mode.A.tangential_accel + ps->cfg->mode.A.tangential_accel_var * ps_random_m11(rand);
 
-	p->mode.A.radial_accel = ps->cfg->mode.A.radial_accel + ps->cfg->mode.A.radial_accel_var * RANDOM_M11(rand);
+	p->mode.A.radial_accel = ps->cfg->mode.A.radial_accel + ps->cfg->mode.A.radial_accel_var * ps_random_m11(rand);
 
 	if (ps->cfg->mode.A.rotation_is_dir) {
 		p->angle = atan2f(p->mode.A.speed.y, p->mode.A.speed.x);
@@ -62,27 +62,27 @@ _init_mode_gravity(struct p2d_particle_system* ps, struct p2d_particle* p, uint3
 
 static inline void
 _init_mode_radius(struct p2d_particle_system* ps, struct p2d_particle* p, uint32_t* rand) {
-	float dir = ps->cfg->direction + ps->cfg->direction_var * RANDOM_M11(rand);
+	float dir = ps->cfg->direction + ps->cfg->direction_var * ps_random_m11(rand);
 	p->mode.B.direction = dir;
-	p->mode.B.direction_delta = ps->cfg->mode.B.direction_delta + ps->cfg->mode.B.direction_delta_var * RANDOM_M11(rand);
+	p->mode.B.direction_delta = ps->cfg->mode.B.direction_delta + ps->cfg->mode.B.direction_delta_var * ps_random_m11(rand);
 
-	float start_radius = ps->cfg->mode.B.start_radius + ps->cfg->mode.B.start_radius_var * RANDOM_M11(rand);
-	float end_radius = ps->cfg->mode.B.end_radius + ps->cfg->mode.B.end_radius_var * RANDOM_M11(rand);
+	float start_radius = ps->cfg->mode.B.start_radius + ps->cfg->mode.B.start_radius_var * ps_random_m11(rand);
+	float end_radius = ps->cfg->mode.B.end_radius + ps->cfg->mode.B.end_radius_var * ps_random_m11(rand);
 	p->mode.B.radius = start_radius;
 	p->mode.B.radius_delta = (end_radius - start_radius) / p->life;
 }
 
 static inline void
 _init_mode_spd_cos(struct p2d_particle_system* ps, struct p2d_particle* p, uint32_t* rand) {
-	float dir = ps->cfg->direction + ps->cfg->direction_var * RANDOM_M11(rand);
+	float dir = ps->cfg->direction + ps->cfg->direction_var * ps_random_m11(rand);
 	p->mode.C.lifetime = p->life;
 
-	float speed = ps->cfg->mode.C.speed + ps->cfg->mode.C.speed_var * RANDOM_M11(rand);
+	float speed = ps->cfg->mode.C.speed + ps->cfg->mode.C.speed_var * ps_random_m11(rand);
 	p->mode.C.speed.x = cosf(dir) * speed;
 	p->mode.C.speed.y = sinf(dir) * speed;
 
-	p->mode.C.cos_amplitude = ps->cfg->mode.C.cos_amplitude + ps->cfg->mode.C.cos_amplitude_var * RANDOM_M11(rand);
-	p->mode.C.cos_frequency = ps->cfg->mode.C.cos_frequency + ps->cfg->mode.C.cos_frequency_var * RANDOM_M11(rand);
+	p->mode.C.cos_amplitude = ps->cfg->mode.C.cos_amplitude + ps->cfg->mode.C.cos_amplitude_var * ps_random_m11(rand);
+	p->mode.C.cos_frequency = ps->cfg->mode.C.cos_frequency + ps->cfg->mode.C.cos_frequency_var * ps_random_m11(rand);
 }
 
 static inline void
@@ -91,10 +91,10 @@ _init_particle(struct p2d_particle_system* ps, struct p2d_particle* p) {
 
 	p->symbol = (struct p2d_symbol*)(ps->cfg->symbols + RANDSEED % ps->cfg->symbol_count);
 
-	p->life = ps->cfg->life + ps->cfg->life_var * RANDOM_M11(&RANDSEED);
+	p->life = ps->cfg->life + ps->cfg->life_var * ps_random_m11(&RANDSEED);
 
-	p->position.x = ps->cfg->position.x + ps->cfg->position_var.x * RANDOM_M11(&RANDSEED);
-	p->position.y = ps->cfg->position.y + ps->cfg->position_var.y * RANDOM_M11(&RANDSEED);
+	p->position.x = ps->cfg->position.x + ps->cfg->position_var.x * ps_random_m11(&RANDSEED);
+	p->position.y = ps->cfg->position.y + ps->cfg->position_var.y * ps_random_m11(&RANDSEED);
 	p->position_ori = p->position;
 
 	float k = 1 / p->life;
