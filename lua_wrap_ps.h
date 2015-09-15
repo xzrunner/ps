@@ -3,15 +3,15 @@ extern "C"
 {
 #endif
 
-#ifndef particle_lua
-#define particle_lua
+#ifndef lua_wrap_ps
+#define lua_wrap_ps
 
 #include "lua.h"
 #include "lauxlib.h"
 
 int luaopen_ps_c(lua_State* L);
 
-#endif // particle_lua
+#endif // lua_wrap_ps
 
 #ifdef __cplusplus
 }
