@@ -15,7 +15,7 @@ _ps_init(struct p3d_particle_system* ps, int num) {
 
 struct p3d_particle_system* 
 p3d_create(int num, struct p3d_ps_config* cfg) {
-	int sz = sizeof(struct p3d_particle_system) + num * (sizeof(struct p3d_particle));
+	int sz = SIZEOF_P3D_PARTICLE_SYSTEM + num * SIZEOF_P3D_PARTICLE;
 	struct p3d_particle_system* ps = (struct p3d_particle_system*)malloc(sz);
 	memset(ps, 0, sz);
 	ps->cfg = cfg;
@@ -31,7 +31,7 @@ p3d_release(struct p3d_particle_system* ps)
 
 struct p3d_particle_system* 
 p3d_create_with_mem(void* mem, int num, struct p3d_ps_config* cfg) {
-	int sz = sizeof(struct p3d_particle_system) + num * (sizeof(struct p3d_particle));
+	int sz = SIZEOF_P3D_PARTICLE_SYSTEM + num * SIZEOF_P3D_PARTICLE;
 	struct p3d_particle_system* ps = (struct p3d_particle_system*)mem;
 	memset(ps, 0, sz);
 	ps->cfg = cfg;

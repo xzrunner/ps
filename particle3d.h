@@ -25,6 +25,8 @@ struct p3d_symbol {
 	void* ud;
 };
 
+#define SIZEOF_P3D_SYMBOL (sizeof(struct p3d_symbol) + 2 * PTR_SIZE_DIFF)
+
 struct p3d_particle_cfg {
 	float lifetime;
 
@@ -41,8 +43,12 @@ struct p3d_particle_cfg {
 	float dis_spd;
 	float dis_region;
 
+	int _dummy;		// unused: dummy for align to 64bit
+
 	struct p3d_symbol* symbol;
 };
+
+#define SIZEOF_P3D_PARTICLE_CFG (sizeof(struct p3d_particle_cfg) + PTR_SIZE_DIFF)
 
 struct p3d_particle {
 	//	struct ps_vec2 pos;
@@ -50,6 +56,8 @@ struct p3d_particle {
 	struct p3d_particle_cfg cfg;
 
 	float life;
+
+	int _dummy;		// unused: dummy for align to 64bit
 
 	struct ps_vec3 pos;
 
@@ -65,6 +73,8 @@ struct p3d_particle {
 
 	struct p3d_particle_system* bind_ps;
 };
+
+#define SIZEOF_P3D_PARTICLE (sizeof(struct p3d_particle) + PTR_SIZE_DIFF)
 
 struct p3d_ps_config {
 //	float lifetime;
@@ -90,11 +100,14 @@ struct p3d_ps_config {
 	float fadeout_time;
 
 	bool bounce;
-
+	char _pad1[3];		// unused: dummy for align to 64bit
+	
 	float start_radius;
 	bool is_start_radius_3d;
+	char _pad2[3];		// unused: dummy for align to 64bit
 
 	bool orient_to_movement;
+	char _pad3[3];		// unused: dummy for align to 64bit
 
 	struct ps_vec3 dir;
 
@@ -104,6 +117,8 @@ struct p3d_ps_config {
 	struct p3d_symbol* symbols;
 };
 
+#define SIZEOF_P3D_PS_CONFIG (sizeof(struct p3d_ps_config) + PTR_SIZE_DIFF)
+
 struct p3d_particle_system {
 	struct p3d_particle *start, *last, *end;
 
@@ -112,12 +127,15 @@ struct p3d_particle_system {
 
 	bool active;
 	bool loop;
+	char _pad[2];	// unused: dummy for align to 64bit
 
 	void (*add_func)(struct p3d_particle*);
 	void (*remove_func)(struct p3d_particle*);
 
 	struct p3d_ps_config* cfg;
 };
+
+#define SIZEOF_P3D_PARTICLE_SYSTEM (sizeof(struct p3d_particle_system) + 6 * PTR_SIZE_DIFF)
 
 struct p3d_particle_system* p3d_create(int num, struct p3d_ps_config* cfg);
 void p3d_release(struct p3d_particle_system* ps);

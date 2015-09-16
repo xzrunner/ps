@@ -11,6 +11,9 @@ extern "C"
 
 #define PI 3.1415926
 
+#define PTR_SIZE_DIFF (8 - sizeof(void *))
+#define SIZEOF_POINTER 8
+
 struct ps_vec2 {
 	union {
 		struct {
