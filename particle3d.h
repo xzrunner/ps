@@ -74,7 +74,7 @@ struct p3d_particle {
 	struct p3d_particle_system* bind_ps;
 };
 
-#define SIZEOF_P3D_PARTICLE (sizeof(struct p3d_particle) + PTR_SIZE_DIFF)
+#define SIZEOF_P3D_PARTICLE (sizeof(struct p3d_particle) + PTR_SIZE_DIFF - sizeof(struct p3d_particle_cfg) + SIZEOF_P3D_PARTICLE_CFG)
 
 struct p3d_ps_config {
 //	float lifetime;
