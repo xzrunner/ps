@@ -25,10 +25,14 @@ struct p2d_symbol {
 	void* ud;
 };
 
+#define SIZEOF_P2D_SYMBOL (sizeof(struct p2d_symbol) + PTR_SIZE_DIFF)
+
 struct p2d_particle {
 	struct p2d_symbol* symbol;
 
 	float life;
+
+	int _dummy;		// unused: dummy for align to 64bit
 
 	struct ps_vec2 position, position_ori;
 
@@ -53,9 +57,12 @@ struct p2d_particle {
 			float lifetime;
 			struct ps_vec2 speed;
 			float cos_amplitude, cos_frequency;
+			int _dummy;		// unused: dummy for align to 64bit
 		} C;
 	} mode;
 };
+
+#define SIZEOF_P2D_PARTICLE (sizeof(struct p2d_particle) + PTR_SIZE_DIFF)
 
 struct p2d_ps_config {
 	int mode_type;
@@ -71,6 +78,7 @@ struct p2d_ps_config {
 			float radial_accel, radial_accel_var;
 
 			bool rotation_is_dir;
+			char _pad3[7];		// unused: dummy for align to 64bit
 		} A;
 
 		// radius + rotate
@@ -104,6 +112,8 @@ struct p2d_ps_config {
 	struct p2d_symbol* symbols;
 };
 
+#define SIZEOF_P2D_PS_CONFIG (sizeof(struct p2d_ps_config) + PTR_SIZE_DIFF)
+
 struct p2d_particle_system {
 	struct p2d_particle *start, *last, *end;
 
@@ -111,9 +121,12 @@ struct p2d_particle_system {
 
 	bool is_active;
 	bool is_loop;
+	char _pad[2];	// unused: dummy for align to 64bit
 
 	struct p2d_ps_config* cfg;
 };
+
+#define SIZEOF_P2D_PARTICLE_SYSTEM (sizeof(struct p2d_particle_system) + 4 * PTR_SIZE_DIFF)
 
 struct p2d_particle_system* p2d_create(int num, struct p2d_ps_config* cfg);
 void p2d_release(struct p2d_particle_system* ps);

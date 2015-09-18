@@ -15,7 +15,7 @@ _ps_init(struct p2d_particle_system* ps, int num) {
 
 struct p2d_particle_system* 
 p2d_create(int num, struct p2d_ps_config* cfg) {
-	int sz = sizeof(struct p2d_particle_system) + num * (sizeof(struct p2d_particle));
+	int sz = SIZEOF_P2D_PARTICLE_SYSTEM + num * SIZEOF_P2D_PARTICLE;
 	struct p2d_particle_system* ps = (struct p2d_particle_system*)malloc(sz);
 	memset(ps, 0, sz);
 	ps->cfg = cfg;
