@@ -131,6 +131,8 @@ struct p2d_particle_system {
 struct p2d_particle_system* p2d_create(int num, struct p2d_ps_config* cfg);
 void p2d_release(struct p2d_particle_system* ps);
 
+struct p2d_particle_system* p2d_create_with_mem(void* mem, int num, struct p2d_ps_config* cfg);
+
 void p2d_update(struct p2d_particle_system* ps, float dt);
 
 #endif // particle2d_h

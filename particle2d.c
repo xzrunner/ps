@@ -28,6 +28,16 @@ p2d_release(struct p2d_particle_system* ps) {
 	free(ps);
 }
 
+struct p2d_particle_system* 
+p2d_create_with_mem(void* mem, int num, struct p2d_ps_config* cfg) {
+	int sz = SIZEOF_P2D_PARTICLE_SYSTEM + num * SIZEOF_P2D_PARTICLE;
+	struct p2d_particle_system* ps = (struct p2d_particle_system*)mem;
+	memset(ps, 0, sz);
+	ps->cfg = cfg;
+	_ps_init(ps, num);
+	return ps;
+}
+
 static inline void
 _pause(struct p2d_particle_system* ps) {
 	ps->is_active = false;
