@@ -131,7 +131,7 @@ _add(struct p3d_particle_system* ps) {
 	}
 
 	if (ps->add_func) {
-		ps->add_func(p);
+		ps->add_func(p, ps->ud);
 	}
 
 	ps->last++;
@@ -140,7 +140,7 @@ _add(struct p3d_particle_system* ps) {
 static inline void
 _remove(struct p3d_particle_system* ps, struct p3d_particle* p) {
 	if (ps->remove_func) {
-		ps->remove_func(p);
+		ps->remove_func(p, ps->ud);
 	}
 	if (!_is_empty(ps)) {
 		*p = *(--ps->last);
