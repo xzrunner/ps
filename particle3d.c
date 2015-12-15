@@ -10,6 +10,8 @@ _ps_init(struct p3d_particle_system* ps, int num) {
 	ps->end = ps->start + num;
 
 	ps->emit_counter = 0;
+	ps->particle_count = 0;
+
 	ps->active = false;
 }
 
@@ -220,24 +222,13 @@ _update_position(struct p3d_particle_system* ps, float dt, struct p3d_particle* 
 
 void 
 p3d_update(struct p3d_particle_system* ps, float dt) {
-	if (ps->active) {
-		if (ps->cfg->loop) {
-			float rate = ps->cfg->emission_time / ps->cfg->count;
-			ps->emit_counter += dt;
-			while (ps->emit_counter > rate) {
-				_add(ps);
-				ps->emit_counter -= rate;
-			}
-		} else {
-			for (int i = 0; i < ps->cfg->count; ++i) {
-				_add(ps);
-			}
-			_stop(ps);
-
-// 			ps->life -= dt;
-// 			if (ps->life < 0) {
-// 				_stop(ps);
-// 			}
+	if (ps->active && (ps->cfg->loop || ps->particle_count < ps->cfg->count)) {
+		float rate = ps->cfg->emission_time / ps->cfg->count;
+		ps->emit_counter += dt;
+		while (ps->emit_counter > rate) {
+			++ps->particle_count;
+			_add(ps);
+			ps->emit_counter -= rate;
 		}
 	}
 

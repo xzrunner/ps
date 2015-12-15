@@ -123,11 +123,11 @@ struct p3d_ps_config {
 struct p3d_particle_system {
 	struct p3d_particle *start, *last, *end;
 
-//	float life;
 	float emit_counter;
+	int particle_count;
 
 	bool active;
-	char _pad[2];	// unused: dummy for align to 64bit
+	char _pad[7];	// unused: dummy for align to 64bit
 
 	void (*add_func)(struct p3d_particle*, void* ud);
 	void (*remove_func)(struct p3d_particle*, void* ud);
