@@ -1,7 +1,7 @@
 #include "particle3d.h"
 #include "sprite.h"
 #include "spritepack.h"
-#include "adapter/ej_ps.h"
+#include "ej_ps.h"
 
 #include "lua.h"
 #include "lauxlib.h"
