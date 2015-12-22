@@ -46,6 +46,16 @@ lp3d_resume(lua_State* L) {
 	return 0;
 }
 
+static int
+lp3d_set_loop(lua_State* L) {
+	luaL_checktype(L, 1, LUA_TUSERDATA);
+	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
+	struct p3d_particle_system* ps = spr->s.p3d->spr.ps;
+	bool loop = lua_toboolean(L, 2);
+	ps->cfg->loop = loop;
+	return 0;
+}
+
 int
 luaopen_ps_c(lua_State* L) {
 	luaL_checkversion(L);
@@ -56,6 +66,7 @@ luaopen_ps_c(lua_State* L) {
 		{ "p3d_update", lp3d_update },
 		{ "p3d_pause", lp3d_pause },
 		{ "p3d_resume", lp3d_resume },
+		{ "p3d_set_loop", lp3d_set_loop },
 
 		{ NULL, NULL },
 	};
