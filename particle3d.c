@@ -203,21 +203,33 @@ _update_angle(struct p3d_particle_system* ps, float dt, struct p3d_particle* p) 
 }
 
 static inline void
+_update_with_ground(struct p3d_particle_system* ps, struct p3d_particle* p) {
+	if (p->pos.z >= 0) {
+		return;
+	}
+
+	switch (ps->cfg->ground) {
+	case P3D_NO_GROUND:
+		break;
+	case P3D_GROUND_WITH_BOUNCE:
+		p->pos.z *= -0.2f;
+		p->spd.x *= 0.4f;
+		p->spd.y *= 0.4f;
+		p->spd.z *= -0.2f;
+		break;
+	case P3D_GROUND_WITHOUT_BOUNCE:
+		p->pos.z = 0;
+		memset(p->spd.xyz, 0, sizeof(p->spd));
+		break;
+	}
+}
+
+static inline void
 _update_position(struct p3d_particle_system* ps, float dt, struct p3d_particle* p) {
 	for (int i = 0; i < 3; ++i) {
 		p->pos.xyz[i] += p->spd.xyz[i] * dt;
 	}
-	if (p->pos.z < 0) {
-		if (ps->cfg->bounce) {
-			p->pos.z *= -0.2f;
-			p->spd.x *= 0.4f;
-			p->spd.y *= 0.4f;
-			p->spd.z *= -0.2f;
-		} else {
-			p->pos.z = 0;
-			memset(p->spd.xyz, 0, sizeof(p->spd));
-		}
-	}
+	_update_with_ground(ps, p);
 }
 
 void 

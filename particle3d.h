@@ -76,6 +76,12 @@ struct p3d_particle {
 
 #define SIZEOF_P3D_PARTICLE (sizeof(struct p3d_particle) + PTR_SIZE_DIFF - sizeof(struct p3d_particle_cfg) + SIZEOF_P3D_PARTICLE_CFG)
 
+enum GROUND_TYPE {
+	P3D_NO_GROUND = 0,
+	P3D_GROUND_WITH_BOUNCE,
+	P3D_GROUND_WITHOUT_BOUNCE,
+};
+
 struct p3d_ps_config {
 //	float lifetime;
 
@@ -99,8 +105,7 @@ struct p3d_ps_config {
 
 	float fadeout_time;
 
-	bool bounce;
-	char _pad1[3];		// unused: dummy for align to 64bit
+	int ground;
 	
 	float start_radius;
 	bool is_start_radius_3d;
