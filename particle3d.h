@@ -129,8 +129,6 @@ struct p3d_particle_system {
 	bool active;
 	char _pad[7];	// unused: dummy for align to 64bit
 
-	void (*render_func)(void* symbol, float x, float y, float angle, float scale, 
-		struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud);
 	void (*add_func)(struct p3d_particle*, void* ud);
 	void (*remove_func)(struct p3d_particle*, void* ud);
 	void* ud;
@@ -138,7 +136,7 @@ struct p3d_particle_system {
 	struct p3d_ps_config* cfg;
 };
 
-#define SIZEOF_P3D_PARTICLE_SYSTEM (sizeof(struct p3d_particle_system) + 8 * PTR_SIZE_DIFF)
+#define SIZEOF_P3D_PARTICLE_SYSTEM (sizeof(struct p3d_particle_system) + 7 * PTR_SIZE_DIFF)
 
 struct p3d_particle_system* p3d_create(int num, struct p3d_ps_config* cfg);
 void p3d_release(struct p3d_particle_system* ps);
@@ -146,7 +144,6 @@ void p3d_release(struct p3d_particle_system* ps);
 struct p3d_particle_system* p3d_create_with_mem(void* mem, int num, struct p3d_ps_config* cfg);
 
 void p3d_update(struct p3d_particle_system* ps, float dt);
-void p3d_draw(struct p3d_particle_system* ps, const void* ud);
 
 #endif // particle3d_h
 
