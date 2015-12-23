@@ -163,7 +163,7 @@ _update_speed(struct p3d_particle_system* ps, float dt, struct p3d_particle* p) 
 	}
 
 	// disturbance
-	if (p->spd.z != 0 && p->pos.z > 0) {
+//	if (p->spd.z != 0 && p->pos.z > 0) {
 		struct ps_vec3 dis_dir;
 		dis_dir.x = p->dis_dir.x;
 		dis_dir.y = p->dis_dir.y;
@@ -180,7 +180,7 @@ _update_speed(struct p3d_particle_system* ps, float dt, struct p3d_particle* p) 
 			p->dis_dir.y = -p->dis_dir.y;
 			p->dis_curr_len = -p->cfg.dis_region;
 		}
-	}
+//	}
 }
 
 static inline void
@@ -197,9 +197,9 @@ _update_angle(struct p3d_particle_system* ps, float dt, struct p3d_particle* p) 
 
 		p->angle = atan2f(pos_new.y - pos_old.y, pos_new.x - pos_old.x) - PI * 0.5f;
 	} else {
-		if (p->pos.z > 0.1f) {
+//		if (p->pos.z > 0.1f) {
 			p->angle += p->cfg.angular_spd * dt;
-		}
+//		}
 	}
 }
 
