@@ -112,8 +112,7 @@ struct p3d_ps_config {
 	char _pad2[3];		// unused: dummy for align to 64bit
 
 	bool orient_to_movement;
-	bool loop;
-	char _pad3[2];		// unused: dummy for align to 64bit
+	char _pad3[3];		// unused: dummy for align to 64bit
 
 	struct ps_vec3 dir;
 
@@ -132,7 +131,8 @@ struct p3d_particle_system {
 	int particle_count;
 
 	bool active;
-	char _pad[7];	// unused: dummy for align to 64bit
+	bool loop;
+	char _pad[6];	// unused: dummy for align to 64bit
 
 	void (*add_func)(struct p3d_particle*, void* ud);
 	void (*remove_func)(struct p3d_particle*, void* ud);
