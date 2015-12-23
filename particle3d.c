@@ -253,3 +253,29 @@ p3d_update(struct p3d_particle_system* ps, float dt) {
 		}
 	}
 }
+
+void 
+p3d_draw(struct p3d_particle_system* ps, const void* ud) {
+	struct ps_vec2 pos;
+	struct ps_color4f mul_col;
+
+	struct p3d_particle* p = ps->start;
+	while (p != ps->last) {
+		float proc = (p->cfg.lifetime - p->life) / p->cfg.lifetime;
+
+		ps_vec3_projection(&p->pos, &pos);
+
+		float scale = proc * (p->cfg.symbol->scale_end - p->cfg.symbol->scale_start) + p->cfg.symbol->scale_start;
+
+		mul_col = p->cfg.symbol->col_mul;
+		if (p->life < ps->cfg->fadeout_time) {
+			mul_col.a *= p->life / ps->cfg->fadeout_time;
+		}
+		float alpha = proc * (p->cfg.symbol->alpha_end - p->cfg.symbol->alpha_start) + p->cfg.symbol->alpha_start;
+		mul_col.a *= alpha;
+
+		ps->render_func(p->cfg.symbol->ud, pos.x + p->init_pos.x, pos.y + p->init_pos.y, p->angle, scale, &mul_col, &p->cfg.symbol->col_add, ud);
+
+		++p;
+	}
+}

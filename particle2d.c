@@ -252,3 +252,12 @@ p2d_update(struct p2d_particle_system* ps, float dt) {
 		}
 	}
 }
+
+void 
+p2d_draw(struct p2d_particle_system* ps, const void* ud) {
+	struct p2d_particle* p = ps->start;
+	while (p != ps->last) {
+		ps->render_func(p->symbol->ud, p->position.x, p->position.y, p->angle, p->scale, &p->col_mul, &p->col_add, ud);
+		++p;
+	}
+}
