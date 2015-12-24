@@ -123,13 +123,12 @@ struct p2d_particle_system {
 	bool is_loop;
 	char _pad[2];	// unused: dummy for align to 64bit
 
-	void (*render_func)(void* symbol, float x, float y, float angle, float scale, 
-		struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud);
-
 	struct p2d_ps_config* cfg;
 };
 
-#define SIZEOF_P2D_PARTICLE_SYSTEM (sizeof(struct p2d_particle_system) + 5 * PTR_SIZE_DIFF)
+#define SIZEOF_P2D_PARTICLE_SYSTEM (sizeof(struct p2d_particle_system) + 4 * PTR_SIZE_DIFF)
+
+void p2d_init(void (*render_func)(void* symbol, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud));
 
 struct p2d_particle_system* p2d_create(int num, struct p2d_ps_config* cfg);
 void p2d_release(struct p2d_particle_system* ps);

@@ -4,6 +4,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+static void (*RENDER_FUNC)(void* symbol, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud);
+
+void 
+p2d_init(void (*render_func)(void* symbol, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud)) {
+	RENDER_FUNC = render_func;	
+}
+
 static inline void 
 _ps_init(struct p2d_particle_system* ps, int num) {
 	ps->last = ps->start = (struct p2d_particle*)(ps + 1);
@@ -257,7 +264,7 @@ void
 p2d_draw(struct p2d_particle_system* ps, const void* ud) {
 	struct p2d_particle* p = ps->start;
 	while (p != ps->last) {
-		ps->render_func(p->symbol->ud, p->position.x, p->position.y, p->angle, p->scale, &p->col_mul, &p->col_add, ud);
+		RENDER_FUNC(p->symbol->ud, p->position.x, p->position.y, p->angle, p->scale, &p->col_mul, &p->col_add, ud);
 		++p;
 	}
 }
