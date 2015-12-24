@@ -91,10 +91,10 @@ _trans_coords3d(float r, float hori, float vert, struct ps_vec3* pos) {
 }
 
 static inline void
-_trans_coords2d(float r, float hori, struct ps_vec3* pos) {
+_trans_coords2d(float r, float h, float hori, struct ps_vec3* pos) {
 	pos->x = r * cosf(hori);
 	pos->y = r * sinf(hori);
-	pos->z = 0;
+	pos->z = h;
 }
 
 static inline void
@@ -115,11 +115,7 @@ _add(struct p3d_particle_system* ps) {
 	p->cfg.dir.x = ps->cfg->hori + ps->cfg->hori_var * ps_random_m11(&RANDSEED);
 	p->cfg.dir.y = ps->cfg->vert + ps->cfg->vert_var * ps_random_m11(&RANDSEED);
 
-	if (ps->cfg->is_start_radius_3d) {
-		_trans_coords3d(ps->cfg->start_radius, p->cfg.dir.x, p->cfg.dir.y, &p->pos);
-	} else {
-		_trans_coords2d(ps->cfg->start_radius, p->cfg.dir.x, &p->pos);
-	}
+	_trans_coords2d(ps->cfg->start_radius, ps->cfg->start_height, p->cfg.dir.x, &p->pos);
 
 	float spd = ps->cfg->spd + ps->cfg->spd_var * ps_random_m11(&RANDSEED);
 	_trans_coords3d(spd, p->cfg.dir.x, p->cfg.dir.y, &p->spd);

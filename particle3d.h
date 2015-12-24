@@ -108,8 +108,7 @@ struct p3d_ps_config {
 	int ground;
 	
 	float start_radius;
-	bool is_start_radius_3d;
-	char _pad2[3];		// unused: dummy for align to 64bit
+	float start_height;
 
 	bool orient_to_movement;
 	char _pad3[3];		// unused: dummy for align to 64bit
