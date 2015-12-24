@@ -134,14 +134,16 @@ struct p3d_particle_system {
 	bool loop;
 	char _pad[6];	// unused: dummy for align to 64bit
 
-	void (*add_func)(struct p3d_particle*, void* ud);
-	void (*remove_func)(struct p3d_particle*, void* ud);
-	void* ud;
-
 	struct p3d_ps_config* cfg;
+
+	void* ud;
 };
 
-#define SIZEOF_P3D_PARTICLE_SYSTEM (sizeof(struct p3d_particle_system) + 7 * PTR_SIZE_DIFF)
+#define SIZEOF_P3D_PARTICLE_SYSTEM (sizeof(struct p3d_particle_system) + 5 * PTR_SIZE_DIFF)
+
+void p3d_init(void (*render_func)(void* symbol, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud),
+			  void (*add_func)(struct p3d_particle*, void* ud),
+			  void (*remove_func)(struct p3d_particle*, void* ud));
 
 struct p3d_particle_system* p3d_create(int num, struct p3d_ps_config* cfg);
 void p3d_release(struct p3d_particle_system* ps);
