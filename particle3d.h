@@ -151,6 +151,7 @@ void p3d_release(struct p3d_particle_system* ps);
 struct p3d_particle_system* p3d_create_with_mem(void* mem, int num, struct p3d_ps_config* cfg);
 
 void p3d_update(struct p3d_particle_system* ps, float dt);
+void p3d_draw(struct p3d_particle_system* ps, const void* ud);
 
 #endif // particle3d_h
 
