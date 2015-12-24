@@ -51,8 +51,7 @@ lp3d_set_loop(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
 	struct p3d_particle_system* ps = spr->s.p3d->spr.ps;
-	bool loop = lua_toboolean(L, 2);
-	ps->cfg->loop = loop;
+	ps->loop = lua_toboolean(L, 2);
 	return 0;
 }
 
