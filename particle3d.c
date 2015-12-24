@@ -164,6 +164,32 @@ _remove(struct p3d_particle_system* ps, struct p3d_particle* p) {
 }
 
 static inline void
+_update_disturbance_speed(struct p3d_particle_system* ps, float dt, struct p3d_particle* p) {
+	// stop disturbance after touch the ground
+	if (ps->cfg->ground != P3D_NO_GROUND && 
+		fabs(p->pos.z) < 1) {
+		return;
+	}
+
+	struct ps_vec3 dis_dir;
+	dis_dir.x = p->dis_dir.x;
+	dis_dir.y = p->dis_dir.y;
+	dis_dir.z = - (p->cfg.spd_dir.x * dis_dir.x + p->cfg.spd_dir.y * dis_dir.y) / p->cfg.spd_dir.z;
+	ps_vec3_normalize(&dis_dir);
+
+	float s = p->cfg.dis_spd * dt;
+	for (int i = 0; i < 3; ++i) {
+		p->spd.xyz[i] += dis_dir.xyz[i] * s;
+	}
+	p->dis_curr_len += s;
+	if (p->dis_curr_len > p->cfg.dis_region) {
+		p->dis_dir.x = -p->dis_dir.x;
+		p->dis_dir.y = -p->dis_dir.y;
+		p->dis_curr_len = -p->cfg.dis_region;
+	}
+}
+
+static inline void
 _update_speed(struct p3d_particle_system* ps, float dt, struct p3d_particle* p) {
 	// gravity
 	p->spd.z -= ps->cfg->gravity * dt;
@@ -175,25 +201,7 @@ _update_speed(struct p3d_particle_system* ps, float dt, struct p3d_particle* p) 
 		p->spd.xyz[i] += linear_acc * p->spd.xyz[i] / velocity;
 	}
 
-	// disturbance
-//	if (p->spd.z != 0 && p->pos.z > 0) {
-		struct ps_vec3 dis_dir;
-		dis_dir.x = p->dis_dir.x;
-		dis_dir.y = p->dis_dir.y;
-		dis_dir.z = - (p->cfg.spd_dir.x * dis_dir.x + p->cfg.spd_dir.y * dis_dir.y) / p->cfg.spd_dir.z;
-		ps_vec3_normalize(&dis_dir);
-
-		float s = p->cfg.dis_spd * dt;
-		for (int i = 0; i < 3; ++i) {
-			p->spd.xyz[i] += dis_dir.xyz[i] * s;
-		}
-		p->dis_curr_len += s;
-		if (p->dis_curr_len > p->cfg.dis_region) {
-			p->dis_dir.x = -p->dis_dir.x;
-			p->dis_dir.y = -p->dis_dir.y;
-			p->dis_curr_len = -p->cfg.dis_region;
-		}
-//	}
+	_update_disturbance_speed(ps, dt, p);
 }
 
 static inline void
@@ -208,11 +216,21 @@ _update_angle(struct p3d_particle_system* ps, float dt, struct p3d_particle* p) 
 		}
 		ps_vec3_projection(&pos, &pos_new);
 
+		// stop update angle when move slowly
+		if (fabs(pos_new.x - pos_old.x) < 1 &&
+			fabs(pos_new.y - pos_old.y) < 1) {
+			return;
+		}
+
 		p->angle = atan2f(pos_new.y - pos_old.y, pos_new.x - pos_old.x) - PI * 0.5f;
 	} else {
-//		if (p->pos.z > 0.1f) {
-			p->angle += p->cfg.angular_spd * dt;
-//		}
+		// stop update angle after touch the ground
+		if (ps->cfg->ground != P3D_NO_GROUND &&
+			fabs(p->pos.z) < 1) {
+			return;
+		}
+
+		p->angle += p->cfg.angular_spd * dt;
 	}
 }
 
