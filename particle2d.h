@@ -60,11 +60,13 @@ struct p2d_particle {
 			int _dummy;		// unused: dummy for align to 64bit
 		} C;
 	} mode;
+
+	struct p2d_particle* next;
 };
 
 #define SIZEOF_P2D_PARTICLE (sizeof(struct p2d_particle) + PTR_SIZE_DIFF)
 
-struct p2d_ps_config {
+struct p2d_emitter_cfg {
 	int mode_type;
 
 	union {
@@ -112,31 +114,31 @@ struct p2d_ps_config {
 	struct p2d_symbol* symbols;
 };
 
-#define SIZEOF_P2D_PS_CONFIG (sizeof(struct p2d_ps_config) + PTR_SIZE_DIFF)
+#define SIZEOF_P2D_PS_CONFIG (sizeof(struct p2d_emitter_cfg) + PTR_SIZE_DIFF)
 
-struct p2d_particle_system {
-	struct p2d_particle *start, *last, *end;
+struct p2d_emitter {
+	struct p2d_particle *head, *tail;
 
 	float emit_counter;
 
-	bool is_active;
-	bool is_loop;
+	bool active;
+	bool loop;
 	char _pad[2];	// unused: dummy for align to 64bit
 
-	struct p2d_ps_config* cfg;
+	struct p2d_emitter_cfg* cfg;
 };
 
-#define SIZEOF_P2D_PARTICLE_SYSTEM (sizeof(struct p2d_particle_system) + 4 * PTR_SIZE_DIFF)
+#define SIZEOF_P2D_PARTICLE_SYSTEM (sizeof(struct p2d_emitter) + 4 * PTR_SIZE_DIFF)
 
-void p2d_init(void (*render_func)(void* symbol, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud));
+void p2d_init();
+void p2d_regist_cb(void (*render_func)(void* symbol, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud));
 
-struct p2d_particle_system* p2d_create(int num, struct p2d_ps_config* cfg);
-void p2d_release(struct p2d_particle_system* ps);
+struct p2d_emitter* p2d_create(struct p2d_emitter_cfg* cfg);
+void p2d_emitter_release(struct p2d_emitter* et);
+void p2d_emitter_clear(struct p2d_emitter* et);
 
-struct p2d_particle_system* p2d_create_with_mem(void* mem, int num, struct p2d_ps_config* cfg);
-
-void p2d_update(struct p2d_particle_system* ps, float dt);
-void p2d_draw(struct p2d_particle_system* ps, const void* ud);
+void p2d_emitter_update(struct p2d_emitter* et, float dt);
+void p2d_emitter_draw(struct p2d_emitter* et, const void* ud);
 
 #endif // particle2d_h
 

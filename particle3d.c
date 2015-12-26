@@ -2,83 +2,125 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
+#include <assert.h>
+
+#define FREELIST_CAP 10000
+
+struct particle_buf {
+	struct p3d_particle* head;
+
+	int cap;
+	int used;
+};
+
+// static emitter_buf {
+// 
+// };
+
+static struct p3d_particle* FREELIST = NULL;
+
+static int PARTICLE_SIZE = 0;
 
 static void (*RENDER_FUNC)(void* symbol, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud);
 static void (*ADD_FUNC)(struct p3d_particle*, void* ud);
 static void (*REMOVE_FUNC)(struct p3d_particle*, void* ud);
 
+static inline struct p3d_particle*
+_fetch_particle() {
+	struct p3d_particle* p = FREELIST;
+	if (!p) {
+		printf("err! no free: _add \n");
+	} else {
+		FREELIST = p->next;
+		++PARTICLE_SIZE;
+	}
+	return p;
+}
+
+static inline void
+_return_particle(struct p3d_particle* p) {
+	--PARTICLE_SIZE;
+	p->next = FREELIST;
+	FREELIST = p;
+}
+
 void 
-p3d_init(void (*render_func)(void* symbol, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud),
-		 void (*add_func)(struct p3d_particle*, void* ud),
-		 void (*remove_func)(struct p3d_particle*, void* ud)) {
+p3d_init() {
+	int sz = sizeof(struct p3d_particle) * FREELIST_CAP;
+	struct p3d_particle* p = (struct p3d_particle*)malloc(sz);
+	if (!p) {
+		printf("malloc err: p3d_init !\n");
+		return;
+	}
+	memset(p, 0, sz);
+
+	for (int i = 0; i < FREELIST_CAP - 1; ++i) {
+		p[i].next = &p[i + 1];
+	}
+	p[FREELIST_CAP - 1].next = NULL;
+
+	FREELIST = p;
+}
+
+void 
+p3d_regist_cb(void (*render_func)(void* symbol, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud),
+			  void (*add_func)(struct p3d_particle*, void* ud),
+			  void (*remove_func)(struct p3d_particle*, void* ud)) {
 	RENDER_FUNC = render_func;
 	ADD_FUNC = add_func;
 	REMOVE_FUNC = remove_func;
 }
 
-void 
-_ps_init(struct p3d_particle_system* ps, int num) {
-	ps->last = ps->start = (struct p3d_particle*)(ps + 1);
-	ps->end = ps->start + num;
+struct p3d_emitter* 
+p3d_emitter_create(struct p3d_emitter_cfg* cfg) {
+	struct p3d_emitter* et = (struct p3d_emitter*)malloc(SIZEOF_P3D_PARTICLE_SYSTEM);
+	memset(et, 0, SIZEOF_P3D_PARTICLE_SYSTEM);
 
-	ps->emit_counter = 0;
-	ps->particle_count = 0;
+	et->active = false;
+	et->loop = true;
 
-	ps->active = false;
-	ps->loop = true;
-}
+	et->cfg = cfg;
 
-struct p3d_particle_system* 
-p3d_create(int num, struct p3d_ps_config* cfg) {
-	int sz = SIZEOF_P3D_PARTICLE_SYSTEM + num * SIZEOF_P3D_PARTICLE;
-	struct p3d_particle_system* ps = (struct p3d_particle_system*)malloc(sz);
-	memset(ps, 0, sz);
-	ps->cfg = cfg;
-	_ps_init(ps, num);
-	return ps;
+	return et;
 }
 
 void 
-p3d_release(struct p3d_particle_system* ps)
-{
-	free(ps);
+p3d_emitter_release(struct p3d_emitter* et) {
+	p3d_emitter_clear(et);
+	free(et);
 }
 
-struct p3d_particle_system* 
-p3d_create_with_mem(void* mem, int num, struct p3d_ps_config* cfg) {
-	int sz = SIZEOF_P3D_PARTICLE_SYSTEM + num * SIZEOF_P3D_PARTICLE;
-	struct p3d_particle_system* ps = (struct p3d_particle_system*)mem;
-	memset(ps, 0, sz);
-	ps->cfg = cfg;
-	_ps_init(ps, num);
-	return ps;
+void 
+p3d_emitter_clear(struct p3d_emitter* et) {
+	struct p3d_particle* p = et->head;
+	while (p) {
+		struct p3d_particle* next = p->next;
+		_return_particle(p);
+		p = next;
+	}
+
+	et->head = et->tail = NULL;
+
+	et->emit_counter = 0;
+	et->particle_count = 0;
 }
 
 // static inline void
-// _resume(struct particle_system_3d* ps) {
-// 	ps->active = true;
+// _resume(struct particle_system_3d* et) {
+// 	et->active = true;
 // }
 
 static inline void
-_pause(struct p3d_particle_system* ps) {
-	ps->active = false;
+_pause(struct p3d_emitter* et) {
+	et->active = false;
 }
 
 static inline void
-_stop(struct p3d_particle_system* ps) {
-	_pause(ps);
-	ps->emit_counter = 0;
-}
-
-static inline bool 
-_is_full(struct p3d_particle_system* ps) {
-	return ps->last == ps->end;	
-}
-
-static inline bool
-_is_empty(struct p3d_particle_system* ps) {
-	return ps->start == ps->last;
+_stop(struct p3d_emitter* et) {
+	_pause(et);
+	et->emit_counter = 0;
 }
 
 static inline void
@@ -98,71 +140,87 @@ _trans_coords2d(float r, float h, float hori, struct ps_vec3* pos) {
 }
 
 static inline void
-_add(struct p3d_particle_system* ps) {
-	if (_is_full(ps) || !ps->cfg->symbol_count) {
-		return;
-	}
-
-	struct p3d_particle* p = ps->last;
-
+_init_particle(struct p3d_emitter* et, struct p3d_particle* p) {
 	uint32_t RANDSEED = rand();
 
-	p->cfg.symbol = (struct p3d_symbol*)(ps->cfg->symbols + RANDSEED % ps->cfg->symbol_count);
+	p->cfg.symbol = (struct p3d_symbol*)(et->cfg->symbols + RANDSEED % et->cfg->symbol_count);
 
-	p->life = ps->cfg->life + ps->cfg->life_var * ps_random_m11(&RANDSEED);
+	p->life = et->cfg->life + et->cfg->life_var * ps_random_m11(&RANDSEED);
 	p->cfg.lifetime = p->life;
 	
-	p->cfg.dir.x = ps->cfg->hori + ps->cfg->hori_var * ps_random_m11(&RANDSEED);
-	p->cfg.dir.y = ps->cfg->vert + ps->cfg->vert_var * ps_random_m11(&RANDSEED);
+	p->cfg.dir.x = et->cfg->hori + et->cfg->hori_var * ps_random_m11(&RANDSEED);
+	p->cfg.dir.y = et->cfg->vert + et->cfg->vert_var * ps_random_m11(&RANDSEED);
 
-	_trans_coords2d(ps->cfg->start_radius, ps->cfg->start_height, p->cfg.dir.x, &p->pos);
+	_trans_coords2d(et->cfg->start_radius, et->cfg->start_height, p->cfg.dir.x, &p->pos);
 
-	float spd = ps->cfg->spd + ps->cfg->spd_var * ps_random_m11(&RANDSEED);
+	float spd = et->cfg->spd + et->cfg->spd_var * ps_random_m11(&RANDSEED);
 	_trans_coords3d(spd, p->cfg.dir.x, p->cfg.dir.y, &p->spd);
 	memcpy(&p->cfg.spd_dir, &p->spd, sizeof(p->spd));
 
-	p->cfg.dis_region = ps->cfg->dis_region + ps->cfg->dis_region_var * ps_random_m11(&RANDSEED);
+	p->cfg.dis_region = et->cfg->dis_region + et->cfg->dis_region_var * ps_random_m11(&RANDSEED);
 	p->dis_curr_len = 0;
 	float dis_angle = PI * ps_random_m11(&RANDSEED);
 	p->dis_dir.x = cosf(dis_angle);
 	p->dis_dir.y = sinf(dis_angle);
-	p->cfg.dis_spd = ps->cfg->dis_spd + ps->cfg->dis_spd_var * ps_random_m11(&RANDSEED);
+	p->cfg.dis_spd = et->cfg->dis_spd + et->cfg->dis_spd_var * ps_random_m11(&RANDSEED);
 
-	p->cfg.linear_acc = ps->cfg->linear_acc + ps->cfg->linear_acc_var * ps_random_m11(&RANDSEED);
+	p->cfg.linear_acc = et->cfg->linear_acc + et->cfg->linear_acc_var * ps_random_m11(&RANDSEED);
 
-	p->cfg.angular_spd = ps->cfg->angular_spd + ps->cfg->angular_spd_var * ps_random_m11(&RANDSEED);
+	p->cfg.angular_spd = et->cfg->angular_spd + et->cfg->angular_spd_var * ps_random_m11(&RANDSEED);
 
 	p->angle = p->cfg.symbol->angle + p->cfg.symbol->angle_var * ps_random_m11(&RANDSEED);
 
-	if (p->cfg.symbol->bind_ps_cfg) {
-		int num = ps->end - ps->start;
-		p->bind_ps = p3d_create(num, p->cfg.symbol->bind_ps_cfg);
-	} else if (p->bind_ps) {
-		free(p->bind_ps);
-		p->bind_ps = NULL;
+// 	// todo bind_ps
+// 	if (p->cfg.symbol->bind_ps_cfg) {
+// 		int num = et->end - et->start;
+// 		p->bind_ps = p3d_create(num, p->cfg.symbol->bind_ps_cfg);
+// 	} else if (p->bind_ps) {
+// 		free(p->bind_ps);
+// 		p->bind_ps = NULL;
+// 	}
+}
+
+static inline void
+_add_particle(struct p3d_emitter* et) {
+	if (!et->cfg->symbol_count) {
+		return;
 	}
+
+	struct p3d_particle* p = _fetch_particle();
+	if (!p) {
+		return;
+	}
+
+	_init_particle(et, p);
 
 	if (ADD_FUNC) {
-		ADD_FUNC(p, ps->ud);
+		ADD_FUNC(p, et->ud);
 	}
 
-	ps->last++;
+	p->next = NULL;
+	if (!et->head) {
+		assert(!et->tail);
+		et->head = et->tail = p;
+	} else {
+		assert(et->tail);
+		et->tail->next = p;
+		et->tail = p;
+	}
 }
 
 static inline void
-_remove(struct p3d_particle_system* ps, struct p3d_particle* p) {
+_remove_particle(struct p3d_emitter* et, struct p3d_particle* p) {
+	_return_particle(p);
+
 	if (REMOVE_FUNC) {
-		REMOVE_FUNC(p, ps->ud);
-	}
-	if (!_is_empty(ps)) {
-		*p = *(--ps->last);
+		REMOVE_FUNC(p, et->ud);
 	}
 }
 
 static inline void
-_update_disturbance_speed(struct p3d_particle_system* ps, float dt, struct p3d_particle* p) {
+_update_disturbance_speed(struct p3d_emitter* et, float dt, struct p3d_particle* p) {
 	// stop disturbance after touch the ground
-	if (ps->cfg->ground != P3D_NO_GROUND && 
+	if (et->cfg->ground != P3D_NO_GROUND && 
 		fabs(p->pos.z) < 1) {
 		return;
 	}
@@ -186,9 +244,9 @@ _update_disturbance_speed(struct p3d_particle_system* ps, float dt, struct p3d_p
 }
 
 static inline void
-_update_speed(struct p3d_particle_system* ps, float dt, struct p3d_particle* p) {
+_update_speed(struct p3d_emitter* et, float dt, struct p3d_particle* p) {
 	// gravity
-	p->spd.z -= ps->cfg->gravity * dt;
+	p->spd.z -= et->cfg->gravity * dt;
 
 	// normal acceleration
 	float velocity = ps_vec3_len(&p->spd);
@@ -197,12 +255,12 @@ _update_speed(struct p3d_particle_system* ps, float dt, struct p3d_particle* p) 
 		p->spd.xyz[i] += linear_acc * p->spd.xyz[i] / velocity;
 	}
 
-	_update_disturbance_speed(ps, dt, p);
+	_update_disturbance_speed(et, dt, p);
 }
 
 static inline void
-_update_angle(struct p3d_particle_system* ps, float dt, struct p3d_particle* p) {
-	if (ps->cfg->orient_to_movement) {
+_update_angle(struct p3d_emitter* et, float dt, struct p3d_particle* p) {
+	if (et->cfg->orient_to_movement) {
 		struct ps_vec2 pos_old, pos_new;
 		ps_vec3_projection(&p->pos, &pos_old);
 		
@@ -221,7 +279,7 @@ _update_angle(struct p3d_particle_system* ps, float dt, struct p3d_particle* p) 
 		p->angle = atan2f(pos_new.y - pos_old.y, pos_new.x - pos_old.x) - PI * 0.5f;
 	} else {
 		// stop update angle after touch the ground
-		if (ps->cfg->ground != P3D_NO_GROUND &&
+		if (et->cfg->ground != P3D_NO_GROUND &&
 			fabs(p->pos.z) < 1) {
 			return;
 		}
@@ -231,12 +289,12 @@ _update_angle(struct p3d_particle_system* ps, float dt, struct p3d_particle* p) 
 }
 
 static inline void
-_update_with_ground(struct p3d_particle_system* ps, struct p3d_particle* p) {
+_update_with_ground(struct p3d_emitter* et, struct p3d_particle* p) {
 	if (p->pos.z >= 0) {
 		return;
 	}
 
-	switch (ps->cfg->ground) {
+	switch (et->cfg->ground) {
 	case P3D_NO_GROUND:
 		break;
 	case P3D_GROUND_WITH_BOUNCE:
@@ -253,54 +311,65 @@ _update_with_ground(struct p3d_particle_system* ps, struct p3d_particle* p) {
 }
 
 static inline void
-_update_position(struct p3d_particle_system* ps, float dt, struct p3d_particle* p) {
+_update_position(struct p3d_emitter* et, float dt, struct p3d_particle* p) {
 	for (int i = 0; i < 3; ++i) {
 		p->pos.xyz[i] += p->spd.xyz[i] * dt;
 	}
-	_update_with_ground(ps, p);
+	_update_with_ground(et, p);
 }
 
 void 
-p3d_update(struct p3d_particle_system* ps, float dt) {
-	if (ps->active && (ps->loop || ps->particle_count < ps->cfg->count)) {
-		float rate = ps->cfg->emission_time / ps->cfg->count;
-		ps->emit_counter += dt;
-		while (ps->emit_counter > rate) {
-			++ps->particle_count;
-			_add(ps);
-			ps->emit_counter -= rate;
+p3d_emitter_update(struct p3d_emitter* et, float dt) {
+	if (et->active && (et->loop || et->particle_count < et->cfg->count)) {
+		float rate = et->cfg->emission_time / et->cfg->count;
+		et->emit_counter += dt;
+		while (et->emit_counter > rate) {
+			++et->particle_count;
+			_add_particle(et);
+			et->emit_counter -= rate;
 		}
 	}
 
-	struct p3d_particle* p = ps->start;
-	while (p != ps->last) {
-		if (p->bind_ps) {
-			p3d_update(p->bind_ps, dt);
+	struct p3d_particle* prev = NULL;
+	struct p3d_particle* curr = et->head;
+	while (curr) {
+		et->tail = curr;
+
+		if (curr->bind_ps) {
+			p3d_emitter_update(curr->bind_ps, dt);
 		}
 
-		p->life -= dt;
-
-		if (p->life > 0) {
-			_update_speed(ps, dt, p);
-			_update_angle(ps, dt, p);
-			_update_position(ps, dt, p);
-			++p;
+		curr->life -= dt;
+		if (curr->life > 0) {
+			_update_speed(et, dt, curr);
+			_update_angle(et, dt, curr);
+			_update_position(et, dt, curr);
+			prev = curr;
+			curr = curr->next;
 		} else {
-			_remove(ps, p);
-			if (p >= ps->last) {
-				return;
+			struct p3d_particle* next = curr->next;
+			if (prev) {
+				prev->next = next;
 			}
+			_remove_particle(et, curr);
+			if (et->head == curr) {
+				et->head = next;
+				if (!next) {
+					et->tail = NULL;
+				}
+			}
+			curr = next;
 		}
 	}
 }
 
 void 
-p3d_draw(struct p3d_particle_system* ps, const void* ud) {
+p3d_emitter_draw(struct p3d_emitter* et, const void* ud) {
 	struct ps_vec2 pos;
 	struct ps_color4f mul_col;
 
-	struct p3d_particle* p = ps->start;
-	while (p != ps->last) {
+	struct p3d_particle* p = et->head;
+	while (p) {
 		float proc = (p->cfg.lifetime - p->life) / p->cfg.lifetime;
 
 		ps_vec3_projection(&p->pos, &pos);
@@ -308,14 +377,19 @@ p3d_draw(struct p3d_particle_system* ps, const void* ud) {
 		float scale = proc * (p->cfg.symbol->scale_end - p->cfg.symbol->scale_start) + p->cfg.symbol->scale_start;
 
 		mul_col = p->cfg.symbol->col_mul;
-		if (p->life < ps->cfg->fadeout_time) {
-			mul_col.a *= p->life / ps->cfg->fadeout_time;
+		if (p->life < et->cfg->fadeout_time) {
+			mul_col.a *= p->life / et->cfg->fadeout_time;
 		}
 		float alpha = proc * (p->cfg.symbol->alpha_end - p->cfg.symbol->alpha_start) + p->cfg.symbol->alpha_start;
 		mul_col.a *= alpha;
 
-		RENDER_FUNC(p->cfg.symbol->ud, pos.x + p->init_pos.x, pos.y + p->init_pos.y, p->angle, scale, &mul_col, &p->cfg.symbol->col_add, ud);
-
-		++p;
+//		RENDER_FUNC(p->cfg.symbol->ud, pos.x + p->init_pos.x, pos.y + p->init_pos.y, p->angle, scale, &mul_col, &p->cfg.symbol->col_add, ud);
+		RENDER_FUNC(p->cfg.symbol->ud, pos.x, pos.y, p->angle, scale, &mul_col, &p->cfg.symbol->col_add, ud);
+		p = p->next;
 	}
+}
+
+void 
+p3d_draw() {
+	
 }

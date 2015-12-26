@@ -10,7 +10,7 @@ extern "C"
 
 #include "utility.h"
 
-struct p3d_ps_config;
+struct p3d_emitter_cfg;
 
 struct p3d_symbol {
 	float scale_start, scale_end;
@@ -20,7 +20,7 @@ struct p3d_symbol {
 	struct ps_color4f col_mul, col_add;
 	float alpha_start, alpha_end;
 
-	struct p3d_ps_config* bind_ps_cfg;
+	struct p3d_emitter_cfg* bind_ps_cfg;
 
 	void* ud;
 };
@@ -68,10 +68,12 @@ struct p3d_particle {
 
 	float angle;
 
-	// 创建时发射器的状态
-	struct ps_vec2 init_pos;
+// 	// 创建时发射器的状态
+// 	struct ps_vec2 init_pos;
 
-	struct p3d_particle_system* bind_ps;
+	struct p3d_emitter* bind_ps;
+
+	struct p3d_particle* next;
 };
 
 #define SIZEOF_P3D_PARTICLE (sizeof(struct p3d_particle) + PTR_SIZE_DIFF - sizeof(struct p3d_particle_cfg) + SIZEOF_P3D_PARTICLE_CFG)
@@ -82,7 +84,7 @@ enum GROUND_TYPE {
 	P3D_GROUND_WITHOUT_BOUNCE,
 };
 
-struct p3d_ps_config {
+struct p3d_emitter_cfg {
 //	float lifetime;
 
 	float emission_time;
@@ -121,10 +123,10 @@ struct p3d_ps_config {
 	struct p3d_symbol* symbols;
 };
 
-#define SIZEOF_P3D_PS_CONFIG (sizeof(struct p3d_ps_config) + PTR_SIZE_DIFF)
+#define SIZEOF_P3D_PS_CONFIG (sizeof(struct p3d_emitter_cfg) + PTR_SIZE_DIFF)
 
-struct p3d_particle_system {
-	struct p3d_particle *start, *last, *end;
+struct p3d_emitter {
+	struct p3d_particle *head, *tail;
 
 	float emit_counter;
 	int particle_count;
@@ -133,24 +135,30 @@ struct p3d_particle_system {
 	bool loop;
 	char _pad[6];	// unused: dummy for align to 64bit
 
-	struct p3d_ps_config* cfg;
+	struct p3d_emitter_cfg* cfg;
 
 	void* ud;
+
+	struct p3d_emitter *prev, *next;
 };
 
-#define SIZEOF_P3D_PARTICLE_SYSTEM (sizeof(struct p3d_particle_system) + 5 * PTR_SIZE_DIFF)
+#define SIZEOF_P3D_PARTICLE_SYSTEM (sizeof(struct p3d_emitter) + 6 * PTR_SIZE_DIFF)
 
-void p3d_init(void (*render_func)(void* symbol, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud),
-			  void (*add_func)(struct p3d_particle*, void* ud),
-			  void (*remove_func)(struct p3d_particle*, void* ud));
+void p3d_init();
+void p3d_regist_cb(void (*render_func)(void* symbol, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud),
+				   void (*add_func)(struct p3d_particle*, void* ud),
+				   void (*remove_func)(struct p3d_particle*, void* ud));
 
-struct p3d_particle_system* p3d_create(int num, struct p3d_ps_config* cfg);
-void p3d_release(struct p3d_particle_system* ps);
+struct p3d_emitter* p3d_emitter_create(struct p3d_emitter_cfg* cfg);
+void p3d_emitter_release(struct p3d_emitter* et);
+void p3d_emitter_clear(struct p3d_emitter* et);
 
-struct p3d_particle_system* p3d_create_with_mem(void* mem, int num, struct p3d_ps_config* cfg);
+void p3d_emitter_update(struct p3d_emitter* et, float dt);
+void p3d_emitter_draw(struct p3d_emitter* et, const void* ud);
 
-void p3d_update(struct p3d_particle_system* ps, float dt);
-void p3d_draw(struct p3d_particle_system* ps, const void* ud);
+void p3d_update(float dt);
+void p3d_draw();
+void p3d_clear();
 
 #endif // particle3d_h
 
