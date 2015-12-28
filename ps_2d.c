@@ -18,12 +18,12 @@ static void (*RENDER_FUNC)(void* symbol, float x, float y, float angle, float sc
 void 
 p2d_init() {
 	int sz = sizeof(struct p2d_particle) * MAX_PARTICLE_SZ;
-	struct p2d_particle* p = (struct p2d_particle*)malloc(sz);
-	if (!p) {
+	PARTICLE_ARRAY = (struct p2d_particle*)malloc(sz);
+	if (!PARTICLE_ARRAY) {
 		printf("malloc err: p2d_init !\n");
 		return;
 	}
-	memset(p, 0, sz);
+	memset(PARTICLE_ARRAY, 0, sz);
 	PS_ARRAY_INIT(PARTICLE_ARRAY, MAX_PARTICLE_SZ);
 
 	sz = sizeof(struct p2d_emitter) * MAX_EMITTER_SZ;
