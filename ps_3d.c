@@ -1,5 +1,5 @@
 #include "ps_3d.h"
-#include "ps_freelist.h"
+#include "ps_array.h"
 
 #include <math.h>
 #include <stdlib.h>

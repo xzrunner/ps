@@ -126,14 +126,14 @@ struct p2d_emitter {
 	char _pad[2];	// unused: dummy for align to 64bit
 
 	struct p2d_emitter_cfg* cfg;
-};
 
-#define SIZEOF_P2D_PARTICLE_SYSTEM (sizeof(struct p2d_emitter) + 4 * PTR_SIZE_DIFF)
+	struct p2d_emitter* next;
+};
 
 void p2d_init();
 void p2d_regist_cb(void (*render_func)(void* symbol, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud));
 
-struct p2d_emitter* p2d_create(struct p2d_emitter_cfg* cfg);
+struct p2d_emitter* p2d_emitter_create(struct p2d_emitter_cfg* cfg);
 void p2d_emitter_release(struct p2d_emitter* et);
 void p2d_emitter_clear(struct p2d_emitter* et);
 
