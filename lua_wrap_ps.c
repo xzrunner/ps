@@ -1,4 +1,4 @@
-#include "particle3d.h"
+#include "ps_3d.h"
 #include "sprite.h"
 #include "spritepack.h"
 #include "ej_ps.h"
@@ -10,9 +10,9 @@ static int
 lp3d_release(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
-	struct p3d_emitter* ps = spr->s.p3d->spr.ps;
-	p3d_release(ps);
-	spr->s.p3d->spr.ps = NULL;
+	struct p3d_emitter* ps = spr->s.p3d->spr.et;
+	p3d_emitter_release(ps);
+	spr->s.p3d->spr.et = NULL;
 	return 0;
 }
 
@@ -29,7 +29,7 @@ lp3d_update(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
 	float dt = luaL_optnumber(L, 2, 0.033f);
-	p3d_update(spr->s.p3d->spr.ps, dt);
+	p3d_emitter_update(spr->s.p3d->spr.et, dt);
 	spr->s.p3d->spr.ps_time += dt;
 	return 0;
 }
@@ -50,7 +50,7 @@ static int
 lp3d_set_loop(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
-	struct p3d_emitter* ps = spr->s.p3d->spr.ps;
+	struct p3d_emitter* ps = spr->s.p3d->spr.et;
 	ps->loop = lua_toboolean(L, 2);
 	return 0;
 }
