@@ -51,9 +51,9 @@ struct p3d_particle_cfg {
 #define SIZEOF_P3D_PARTICLE_CFG (sizeof(struct p3d_particle_cfg) + PTR_SIZE_DIFF)
 
 struct p3d_particle {
-	//	struct ps_vec2 pos;
-
 	struct p3d_particle_cfg cfg;
+
+	float mat[6];
 
 	float life;
 
@@ -67,9 +67,6 @@ struct p3d_particle {
 	float dis_curr_len;
 
 	float angle;
-
-// 	// 创建时发射器的状态
-// 	struct ps_vec2 init_pos;
 
 	struct p3d_emitter* bind_ps;
 
@@ -85,8 +82,6 @@ enum GROUND_TYPE {
 };
 
 struct p3d_emitter_cfg {
-//	float lifetime;
-
 	float emission_time;
 	int count;
 
@@ -128,12 +123,15 @@ struct p3d_emitter_cfg {
 struct p3d_emitter {
 	struct p3d_particle *head, *tail;
 
+	float mat[6];
+
 	float emit_counter;
 	int particle_count;
 
 	bool active;
 	bool loop;
-	char _pad[6];	// unused: dummy for align to 64bit
+	bool local_mode_draw;
+	char _pad[5];	// unused: dummy for align to 64bit
 
 	struct p3d_emitter_cfg* cfg;
 
@@ -145,7 +143,7 @@ struct p3d_emitter {
 #define SIZEOF_P3D_PARTICLE_SYSTEM (sizeof(struct p3d_emitter) + 6 * PTR_SIZE_DIFF)
 
 void p3d_init();
-void p3d_regist_cb(void (*render_func)(void* symbol, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud),
+void p3d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud),
 				   void (*add_func)(struct p3d_particle*, void* ud),
 				   void (*remove_func)(struct p3d_particle*, void* ud));
 

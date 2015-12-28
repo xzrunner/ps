@@ -23,7 +23,7 @@ static struct p3d_particle* FREELIST = NULL;
 
 static int PARTICLE_SIZE = 0;
 
-static void (*RENDER_FUNC)(void* symbol, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud);
+static void (*RENDER_FUNC)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud);
 static void (*ADD_FUNC)(struct p3d_particle*, void* ud);
 static void (*REMOVE_FUNC)(struct p3d_particle*, void* ud);
 
@@ -65,7 +65,7 @@ p3d_init() {
 }
 
 void 
-p3d_regist_cb(void (*render_func)(void* symbol, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud),
+p3d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud),
 			  void (*add_func)(struct p3d_particle*, void* ud),
 			  void (*remove_func)(struct p3d_particle*, void* ud)) {
 	RENDER_FUNC = render_func;
@@ -80,6 +80,7 @@ p3d_emitter_create(struct p3d_emitter_cfg* cfg) {
 
 	et->active = false;
 	et->loop = true;
+	et->local_mode_draw = true;
 
 	et->cfg = cfg;
 
@@ -142,6 +143,8 @@ _trans_coords2d(float r, float h, float hori, struct ps_vec3* pos) {
 static inline void
 _init_particle(struct p3d_emitter* et, struct p3d_particle* p) {
 	uint32_t RANDSEED = rand();
+
+	memcpy(p->mat, et->mat, sizeof(p->mat));
 
 	p->cfg.symbol = (struct p3d_symbol*)(et->cfg->symbols + RANDSEED % et->cfg->symbol_count);
 
@@ -383,8 +386,8 @@ p3d_emitter_draw(struct p3d_emitter* et, const void* ud) {
 		float alpha = proc * (p->cfg.symbol->alpha_end - p->cfg.symbol->alpha_start) + p->cfg.symbol->alpha_start;
 		mul_col.a *= alpha;
 
-//		RENDER_FUNC(p->cfg.symbol->ud, pos.x + p->init_pos.x, pos.y + p->init_pos.y, p->angle, scale, &mul_col, &p->cfg.symbol->col_add, ud);
-		RENDER_FUNC(p->cfg.symbol->ud, pos.x, pos.y, p->angle, scale, &mul_col, &p->cfg.symbol->col_add, ud);
+		RENDER_FUNC(p->cfg.symbol->ud, p->mat, pos.x, pos.y, p->angle, scale, &mul_col, &p->cfg.symbol->col_add, ud);
+
 		p = p->next;
 	}
 }
