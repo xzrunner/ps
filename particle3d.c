@@ -80,7 +80,7 @@ p3d_emitter_create(struct p3d_emitter_cfg* cfg) {
 
 	et->active = false;
 	et->loop = true;
-	et->local_mode_draw = true;
+	et->local_mode_draw = false;
 
 	et->cfg = cfg;
 
