@@ -75,8 +75,8 @@ p3d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, fl
 
 struct p3d_emitter* 
 p3d_emitter_create(struct p3d_emitter_cfg* cfg) {
-	struct p3d_emitter* et = (struct p3d_emitter*)malloc(SIZEOF_P3D_PARTICLE_SYSTEM);
-	memset(et, 0, SIZEOF_P3D_PARTICLE_SYSTEM);
+	struct p3d_emitter* et = (struct p3d_emitter*)malloc(SIZEOF_P3D_PARTICLE_EMITTER);
+	memset(et, 0, SIZEOF_P3D_PARTICLE_EMITTER);
 
 	et->active = false;
 	et->loop = true;

@@ -73,7 +73,7 @@ struct p3d_particle {
 	struct p3d_particle* next;
 };
 
-#define SIZEOF_P3D_PARTICLE (sizeof(struct p3d_particle) + PTR_SIZE_DIFF - sizeof(struct p3d_particle_cfg) + SIZEOF_P3D_PARTICLE_CFG)
+#define SIZEOF_P3D_PARTICLE (sizeof(struct p3d_particle) + PTR_SIZE_DIFF * 2 - sizeof(struct p3d_particle_cfg) + SIZEOF_P3D_PARTICLE_CFG)
 
 enum GROUND_TYPE {
 	P3D_NO_GROUND = 0,
@@ -118,7 +118,7 @@ struct p3d_emitter_cfg {
 	struct p3d_symbol* symbols;
 };
 
-#define SIZEOF_P3D_PS_CONFIG (sizeof(struct p3d_emitter_cfg) + PTR_SIZE_DIFF)
+#define SIZEOF_P3D_EMITTER_CFG (sizeof(struct p3d_emitter_cfg) + PTR_SIZE_DIFF)
 
 struct p3d_emitter {
 	struct p3d_particle *head, *tail;
@@ -140,7 +140,7 @@ struct p3d_emitter {
 	struct p3d_emitter *prev, *next;
 };
 
-#define SIZEOF_P3D_PARTICLE_SYSTEM (sizeof(struct p3d_emitter) + 6 * PTR_SIZE_DIFF)
+#define SIZEOF_P3D_PARTICLE_EMITTER (sizeof(struct p3d_emitter) + 6 * PTR_SIZE_DIFF)
 
 void p3d_init();
 void p3d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud),
