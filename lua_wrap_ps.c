@@ -10,7 +10,7 @@ static int
 lp3d_release(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
-	struct p3d_particle_system* ps = spr->s.p3d->spr.ps;
+	struct p3d_emitter* ps = spr->s.p3d->spr.ps;
 	p3d_release(ps);
 	spr->s.p3d->spr.ps = NULL;
 	return 0;
@@ -50,7 +50,7 @@ static int
 lp3d_set_loop(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
-	struct p3d_particle_system* ps = spr->s.p3d->spr.ps;
+	struct p3d_emitter* ps = spr->s.p3d->spr.ps;
 	ps->loop = lua_toboolean(L, 2);
 	return 0;
 }
