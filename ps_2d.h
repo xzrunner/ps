@@ -3,12 +3,12 @@ extern "C"
 {
 #endif
 
-#ifndef particle2d_h
-#define particle2d_h
+#ifndef particle_system_2d_h
+#define particle_system_2d_h
 
 #include <stdbool.h>
 
-#include "utility.h"
+#include "ps_utility.h"
 
 #define P2D_MODE_GRAVITY	0
 #define P2D_MODE_RADIUS		1
@@ -140,7 +140,7 @@ void p2d_emitter_clear(struct p2d_emitter* et);
 void p2d_emitter_update(struct p2d_emitter* et, float dt);
 void p2d_emitter_draw(struct p2d_emitter* et, const void* ud);
 
-#endif // particle2d_h
+#endif // particle_system_2d_h
 
 #ifdef __cplusplus
 }

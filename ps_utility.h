@@ -3,8 +3,8 @@ extern "C"
 {
 #endif
 
-#ifndef particle_utility_h
-#define particle_utility_h
+#ifndef particle_system_utility_h
+#define particle_system_utility_h
 
 #include <stdint.h>
 #include <math.h>
@@ -110,7 +110,7 @@ ps_random_m11(unsigned int* seed) {
 	return u.f - 3.0f;
 }
 
-#endif // particle_utility_h
+#endif // particle_system_utility_h
 
 #ifdef __cplusplus
 }

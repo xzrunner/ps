@@ -3,12 +3,12 @@ extern "C"
 {
 #endif
 
-#ifndef particle3d_h
-#define particle3d_h
+#ifndef particle_system_3d_h
+#define particle_system_3d_h
 
 #include <stdbool.h>
 
-#include "utility.h"
+#include "ps_utility.h"
 
 struct p3d_emitter_cfg;
 
@@ -137,10 +137,8 @@ struct p3d_emitter {
 
 	void* ud;
 
-	struct p3d_emitter *prev, *next;
+	struct p3d_emitter* next;
 };
-
-#define SIZEOF_P3D_PARTICLE_EMITTER (sizeof(struct p3d_emitter) + 6 * PTR_SIZE_DIFF)
 
 void p3d_init();
 void p3d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud),
@@ -158,7 +156,7 @@ void p3d_update(float dt);
 void p3d_draw();
 void p3d_clear();
 
-#endif // particle3d_h
+#endif // particle_system_3d_h
 
 #ifdef __cplusplus
 }

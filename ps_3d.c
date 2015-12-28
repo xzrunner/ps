@@ -1,4 +1,5 @@
-#include "particle3d.h"
+#include "ps_3d.h"
+#include "ps_freelist.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -6,62 +7,35 @@
 #include <string.h>
 #include <assert.h>
 
-#define FREELIST_CAP 10000
+#define MAX_PARTICLE_SZ 10000
+#define MAX_EMITTER_SZ	1000
 
-struct particle_buf {
-	struct p3d_particle* head;
-
-	int cap;
-	int used;
-};
-
-// static emitter_buf {
-// 
-// };
-
-static struct p3d_particle* FREELIST = NULL;
-
-static int PARTICLE_SIZE = 0;
+static struct p3d_particle* PARTICLE_ARRAY = NULL;
+static struct p3d_emitter* EMITTER_ARRAY = NULL;
 
 static void (*RENDER_FUNC)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud);
 static void (*ADD_FUNC)(struct p3d_particle*, void* ud);
 static void (*REMOVE_FUNC)(struct p3d_particle*, void* ud);
 
-static inline struct p3d_particle*
-_fetch_particle() {
-	struct p3d_particle* p = FREELIST;
-	if (!p) {
-		printf("err! no free: _add \n");
-	} else {
-		FREELIST = p->next;
-		++PARTICLE_SIZE;
-	}
-	return p;
-}
-
-static inline void
-_return_particle(struct p3d_particle* p) {
-	--PARTICLE_SIZE;
-	p->next = FREELIST;
-	FREELIST = p;
-}
-
 void 
 p3d_init() {
-	int sz = sizeof(struct p3d_particle) * FREELIST_CAP;
-	struct p3d_particle* p = (struct p3d_particle*)malloc(sz);
-	if (!p) {
+	int sz = sizeof(struct p3d_particle) * MAX_PARTICLE_SZ;
+	PARTICLE_ARRAY = (struct p3d_particle*)malloc(sz);
+	if (!PARTICLE_ARRAY) {
 		printf("malloc err: p3d_init !\n");
 		return;
 	}
-	memset(p, 0, sz);
+	memset(PARTICLE_ARRAY, 0, sz);
+	PS_ARRAY_INIT(PARTICLE_ARRAY, MAX_PARTICLE_SZ);
 
-	for (int i = 0; i < FREELIST_CAP - 1; ++i) {
-		p[i].next = &p[i + 1];
+	sz = sizeof(struct p3d_emitter) * MAX_EMITTER_SZ;
+	EMITTER_ARRAY = (struct p3d_emitter*)malloc(sz);
+	if (!EMITTER_ARRAY) {
+		printf("malloc err: p3d_init !\n");
+		return;
 	}
-	p[FREELIST_CAP - 1].next = NULL;
-
-	FREELIST = p;
+	memset(EMITTER_ARRAY, 0, sz);
+	PS_ARRAY_INIT(EMITTER_ARRAY, MAX_EMITTER_SZ);
 }
 
 void 
@@ -75,15 +49,14 @@ p3d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, fl
 
 struct p3d_emitter* 
 p3d_emitter_create(struct p3d_emitter_cfg* cfg) {
-	struct p3d_emitter* et = (struct p3d_emitter*)malloc(SIZEOF_P3D_PARTICLE_EMITTER);
-	memset(et, 0, SIZEOF_P3D_PARTICLE_EMITTER);
-
-	et->active = false;
+	struct p3d_emitter* et;
+	PS_ARRAY_ALLOC(EMITTER_ARRAY, et);
+	if (!et) {
+		return NULL;
+	}
+	memset(et, 0, sizeof(struct p3d_emitter));
 	et->loop = true;
-	et->local_mode_draw = false;
-
 	et->cfg = cfg;
-
 	return et;
 }
 
@@ -98,7 +71,7 @@ p3d_emitter_clear(struct p3d_emitter* et) {
 	struct p3d_particle* p = et->head;
 	while (p) {
 		struct p3d_particle* next = p->next;
-		_return_particle(p);
+		PS_ARRAY_FREE(PARTICLE_ARRAY, p);
 		p = next;
 	}
 
@@ -189,7 +162,8 @@ _add_particle(struct p3d_emitter* et) {
 		return;
 	}
 
-	struct p3d_particle* p = _fetch_particle();
+	struct p3d_particle* p;
+	PS_ARRAY_ALLOC(PARTICLE_ARRAY, p);
 	if (!p) {
 		return;
 	}
@@ -213,8 +187,7 @@ _add_particle(struct p3d_emitter* et) {
 
 static inline void
 _remove_particle(struct p3d_emitter* et, struct p3d_particle* p) {
-	_return_particle(p);
-
+	PS_ARRAY_FREE(PARTICLE_ARRAY, p);
 	if (REMOVE_FUNC) {
 		REMOVE_FUNC(p, et->ud);
 	}

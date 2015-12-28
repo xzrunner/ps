@@ -1,4 +1,4 @@
-#include "particle2d.h"
+#include "ps_2d.h"
 
 #include <math.h>
 #include <stdlib.h>
