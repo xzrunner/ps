@@ -123,15 +123,15 @@ struct p3d_emitter_cfg {
 struct p3d_emitter {
 	struct p3d_particle *head, *tail;
 
-	float mat[6];
-
 	float emit_counter;
 	int particle_count;
 
 	bool active;
 	bool loop;
 	bool local_mode_draw;
-	char _pad[5];	// unused: dummy for align to 64bit
+	char _pad[1];	// unused: dummy for align to 64bit
+
+	float time;
 
 	struct p3d_emitter_cfg* cfg;
 
@@ -149,7 +149,7 @@ struct p3d_emitter* p3d_emitter_create(struct p3d_emitter_cfg* cfg);
 void p3d_emitter_release(struct p3d_emitter* et);
 void p3d_emitter_clear(struct p3d_emitter* et);
 
-void p3d_emitter_update(struct p3d_emitter* et, float dt);
+void p3d_emitter_update(struct p3d_emitter* et, float dt, float* mat);
 void p3d_emitter_draw(struct p3d_emitter* et, const void* ud);
 
 void p3d_update(float dt);

@@ -57,6 +57,7 @@ p3d_emitter_create(struct p3d_emitter_cfg* cfg) {
 	memset(et, 0, sizeof(struct p3d_emitter));
 	et->loop = true;
 	et->cfg = cfg;
+	et->local_mode_draw = true;
 	return et;
 }
 
@@ -117,8 +118,6 @@ static inline void
 _init_particle(struct p3d_emitter* et, struct p3d_particle* p) {
 	uint32_t RANDSEED = rand();
 
-	memcpy(p->mat, et->mat, sizeof(p->mat));
-
 	p->cfg.symbol = (struct p3d_symbol*)(et->cfg->symbols + RANDSEED % et->cfg->symbol_count);
 
 	p->life = et->cfg->life + et->cfg->life_var * ps_random_m11(&RANDSEED);
@@ -157,7 +156,7 @@ _init_particle(struct p3d_emitter* et, struct p3d_particle* p) {
 }
 
 static inline void
-_add_particle(struct p3d_emitter* et) {
+_add_particle(struct p3d_emitter* et, float* mat) {
 	if (!et->cfg->symbol_count) {
 		return;
 	}
@@ -168,6 +167,9 @@ _add_particle(struct p3d_emitter* et) {
 		return;
 	}
 
+	if (mat) {
+		memcpy(p->mat, mat, sizeof(p->mat));
+	}
 	_init_particle(et, p);
 
 	if (ADD_FUNC) {
@@ -295,13 +297,13 @@ _update_position(struct p3d_emitter* et, float dt, struct p3d_particle* p) {
 }
 
 void 
-p3d_emitter_update(struct p3d_emitter* et, float dt) {
+p3d_emitter_update(struct p3d_emitter* et, float dt, float* mat) {
 	if (et->active && (et->loop || et->particle_count < et->cfg->count)) {
 		float rate = et->cfg->emission_time / et->cfg->count;
 		et->emit_counter += dt;
 		while (et->emit_counter > rate) {
 			++et->particle_count;
-			_add_particle(et);
+			_add_particle(et, mat);
 			et->emit_counter -= rate;
 		}
 	}
@@ -312,7 +314,7 @@ p3d_emitter_update(struct p3d_emitter* et, float dt) {
 		et->tail = curr;
 
 		if (curr->bind_ps) {
-			p3d_emitter_update(curr->bind_ps, dt);
+			p3d_emitter_update(curr->bind_ps, dt, mat);
 		}
 
 		curr->life -= dt;

@@ -125,6 +125,9 @@ struct p2d_emitter {
 	bool loop;
 	char _pad[2];	// unused: dummy for align to 64bit
 
+	float time;
+	char _pad2[4];	// unused: dummy for align to 64bit
+
 	struct p2d_emitter_cfg* cfg;
 
 	struct p2d_emitter* next;
