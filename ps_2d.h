@@ -114,7 +114,7 @@ struct p2d_emitter_cfg {
 	struct p2d_symbol* symbols;
 };
 
-#define SIZEOF_P2D_PS_CONFIG (sizeof(struct p2d_emitter_cfg) + PTR_SIZE_DIFF)
+#define SIZEOF_P2D_EMITTER_CFG (sizeof(struct p2d_emitter_cfg) + PTR_SIZE_DIFF)
 
 struct p2d_emitter {
 	struct p2d_particle *head, *tail;
