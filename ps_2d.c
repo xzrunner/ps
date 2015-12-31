@@ -13,7 +13,7 @@
 static struct p2d_particle* PARTICLE_ARRAY = NULL;
 static struct p2d_emitter* EMITTER_ARRAY = NULL;
 
-static void (*RENDER_FUNC)(void* symbol, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud);
+static void (*RENDER_FUNC)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud);
 
 void 
 p2d_init() {
@@ -37,7 +37,7 @@ p2d_init() {
 }
 
 void 
-p2d_regist_cb(void (*render_func)(void* symbol, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud)) {
+p2d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud)) {
 	RENDER_FUNC = render_func;	
 }
 
@@ -49,6 +49,7 @@ p2d_emitter_create(struct p2d_emitter_cfg* cfg) {
 		return NULL;
 	}
 	memset(et, 0, sizeof(struct p2d_emitter));
+	et->loop = true;
 	et->cfg = cfg;
 	return et;
 }
@@ -71,6 +72,7 @@ p2d_emitter_clear(struct p2d_emitter* et) {
 	et->head = et->tail = NULL;
 
 	et->emit_counter = 0;
+	et->particle_count = 0;
 }
 
 static inline void
@@ -163,7 +165,7 @@ _init_particle(struct p2d_emitter* et, struct p2d_particle* p) {
 }
 
 static inline void
-_add_particle(struct p2d_emitter* et) {
+_add_particle(struct p2d_emitter* et, float* mat) {
 	if (!et->cfg->symbol_count) {
 		return;
 	}
@@ -174,6 +176,9 @@ _add_particle(struct p2d_emitter* et) {
 		return;
 	}
 
+	if (mat) {
+		memcpy(p->mat, mat, sizeof(p->mat));
+	}
 	_init_particle(et, p);
 
 	p->next = NULL;
@@ -259,19 +264,15 @@ _update(struct p2d_emitter* et, float dt, struct p2d_particle* p) {
 }
 
 void 
-p2d_emitter_update(struct p2d_emitter* et, float dt) {
-	if (et->active) {
+p2d_emitter_update(struct p2d_emitter* et, float dt, float* mat) {
+	if (et->active && (et->loop || et->particle_count < et->cfg->count)) {
 		float rate = et->cfg->emission_time / et->cfg->count;
 		et->emit_counter += dt;
 		while (et->emit_counter > rate) {
-			_add_particle(et);
+			++et->particle_count;
+			_add_particle(et, mat);
 			et->emit_counter -= rate;
 		}
-	} else {
-		for (int i = 0; i < et->cfg->count; ++i) {
-			_add_particle(et);
-		}
-		_stop(et);
 	}
 
 	struct p2d_particle* prev = NULL;
@@ -305,7 +306,7 @@ void
 p2d_emitter_draw(struct p2d_emitter* et, const void* ud) {
 	struct p2d_particle* p = et->head;
 	while (p) {
-		RENDER_FUNC(p->symbol->ud, p->position.x, p->position.y, p->angle, p->scale, &p->col_mul, &p->col_add, ud);
+		RENDER_FUNC(p->symbol->ud, p->mat, p->position.x, p->position.y, p->angle, p->scale, &p->col_mul, &p->col_add, ud);
 		p = p->next;
 	}
 }

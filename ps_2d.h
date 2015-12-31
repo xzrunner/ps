@@ -30,6 +30,8 @@ struct p2d_symbol {
 struct p2d_particle {
 	struct p2d_symbol* symbol;
 
+	float mat[6];
+
 	float life;
 
 	int _dummy;		// unused: dummy for align to 64bit
@@ -120,13 +122,14 @@ struct p2d_emitter {
 	struct p2d_particle *head, *tail;
 
 	float emit_counter;
+	int particle_count;
 
 	bool active;
 	bool loop;
-	char _pad[2];	// unused: dummy for align to 64bit
+	bool local_mode_draw;
+	char _pad[1];	// unused: dummy for align to 64bit
 
 	float time;
-	char _pad2[4];	// unused: dummy for align to 64bit
 
 	struct p2d_emitter_cfg* cfg;
 
@@ -134,13 +137,13 @@ struct p2d_emitter {
 };
 
 void p2d_init();
-void p2d_regist_cb(void (*render_func)(void* symbol, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud));
+void p2d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud));
 
 struct p2d_emitter* p2d_emitter_create(struct p2d_emitter_cfg* cfg);
 void p2d_emitter_release(struct p2d_emitter* et);
 void p2d_emitter_clear(struct p2d_emitter* et);
 
-void p2d_emitter_update(struct p2d_emitter* et, float dt);
+void p2d_emitter_update(struct p2d_emitter* et, float dt, float* mat);
 void p2d_emitter_draw(struct p2d_emitter* et, const void* ud);
 
 #endif // particle_system_2d_h
