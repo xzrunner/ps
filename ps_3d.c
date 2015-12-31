@@ -57,7 +57,6 @@ p3d_emitter_create(struct p3d_emitter_cfg* cfg) {
 	memset(et, 0, sizeof(struct p3d_emitter));
 	et->loop = true;
 	et->cfg = cfg;
-	et->local_mode_draw = true;
 	return et;
 }
 
