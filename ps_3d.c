@@ -196,6 +196,10 @@ _remove_particle(struct p3d_emitter* et, struct p3d_particle* p) {
 
 static inline void
 _update_disturbance_speed(struct p3d_emitter* et, float dt, struct p3d_particle* p) {
+	if (p->cfg.dis_spd == 0) {
+		return;
+	}
+
 	// stop disturbance after touch the ground
 	if (et->cfg->ground != P3D_NO_GROUND && 
 		fabs(p->pos.z) < 1) {
