@@ -301,13 +301,19 @@ _update_position(struct p3d_emitter* et, float dt, struct p3d_particle* p) {
 
 void 
 p3d_emitter_update(struct p3d_emitter* et, float dt, float* mat) {
-	if (et->active && (et->loop || et->particle_count < et->cfg->count)) {
-		float rate = et->cfg->emission_time / et->cfg->count;
-		et->emit_counter += dt;
-		while (et->emit_counter > rate) {
-			++et->particle_count;
-			_add_particle(et, mat);
-			et->emit_counter -= rate;
+	if (et->active) {
+		if (et->loop) {
+			float rate = et->cfg->emission_time / et->cfg->count;
+			et->emit_counter += dt;
+			while (et->emit_counter > rate) {
+				_add_particle(et, mat);
+				et->emit_counter -= rate;
+			}
+		} else {
+			while (et->particle_count < et->cfg->count) {
+				_add_particle(et, mat);
+				++et->particle_count;
+			}
 		}
 	}
 
