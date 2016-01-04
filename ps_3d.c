@@ -377,11 +377,6 @@ p3d_emitter_draw(struct p3d_emitter* et, const void* ud) {
 	}
 }
 
-void 
-p3d_draw() {
-	
-}
-
 bool 
 p3d_emitter_is_finished(struct p3d_emitter* et) {
 	return !et->loop && et->particle_count >= et->cfg->count && !et->head;
