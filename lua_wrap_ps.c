@@ -10,8 +10,10 @@ static int
 lp3d_release(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
-	p3d_emitter_release(spr->ext.p3d);
-	spr->ext.p3d = NULL;
+	if (spr->type == TYPE_PARTICLE3D) {
+		p3d_emitter_release(spr->ext.p3d);
+		spr->ext.p3d = NULL;
+	}
 	return 0;
 }
 
@@ -19,7 +21,9 @@ static int
 lp3d_clear_time(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
-	spr->ext.p3d->time = 0;
+	if (spr->type == TYPE_PARTICLE3D) {
+		spr->ext.p3d->time = 0;
+	}
 	return 0;
 }
 
@@ -27,9 +31,11 @@ static int
 lp3d_update(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
-	float dt = luaL_optnumber(L, 2, 0.033f);
-	p3d_emitter_update(spr->ext.p3d, dt, NULL);
-	spr->ext.p3d->time += dt;
+	if (spr->type == TYPE_PARTICLE3D) {
+		float dt = luaL_optnumber(L, 2, 0.033f);
+		p3d_emitter_update(spr->ext.p3d, dt, NULL);
+		spr->ext.p3d->time += dt;
+	}
 	return 0;
 }
 
@@ -49,7 +55,9 @@ static int
 lp3d_set_loop(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
-	spr->ext.p3d->loop = lua_toboolean(L, 2);
+	if (spr->type == TYPE_PARTICLE3D) {
+		spr->ext.p3d->loop = lua_toboolean(L, 2);
+	}
 	return 0;
 }
 
@@ -57,8 +65,10 @@ static int
 lp3d_emitter_is_finished(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
-	bool finishded = p3d_emitter_is_finished(spr->ext.p3d);
-	lua_pushboolean(L, finishded);
+	if (spr->type == TYPE_PARTICLE3D) {
+		bool finishded = p3d_emitter_is_finished(spr->ext.p3d);
+		lua_pushboolean(L, finishded);
+	}
 	return 1;
 }
 
