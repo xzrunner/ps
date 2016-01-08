@@ -72,6 +72,16 @@ lp3d_emitter_is_finished(lua_State* L) {
 	return 1;
 }
 
+static int
+lp3d_emitter_stop(lua_State* L) {
+	luaL_checktype(L, 1, LUA_TUSERDATA);
+	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
+	if (spr->type == TYPE_PARTICLE3D) {
+		p3d_emitter_stop(spr->ext.p3d);
+	}
+	return 0;
+}
+
 int
 luaopen_ps_c(lua_State* L) {
 	luaL_checkversion(L);
@@ -83,7 +93,9 @@ luaopen_ps_c(lua_State* L) {
 		{ "p3d_pause", lp3d_pause },
 		{ "p3d_resume", lp3d_resume },
 		{ "p3d_set_loop", lp3d_set_loop },
+
 		{ "p3d_emitter_is_finished", lp3d_emitter_is_finished },
+		{ "p3d_emitter_stop", lp3d_emitter_stop },
 
 		{ NULL, NULL },
 	};

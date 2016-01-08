@@ -378,6 +378,11 @@ p3d_emitter_draw(struct p3d_emitter* et, const void* ud) {
 }
 
 void 
+p3d_emitter_stop(struct p3d_emitter* et) {
+	// todo
+}
+
+void 
 p3d_draw() {
 	
 }
