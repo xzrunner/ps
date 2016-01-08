@@ -379,6 +379,7 @@ p3d_emitter_draw(struct p3d_emitter* et, const void* ud) {
 
 void 
 p3d_emitter_stop(struct p3d_emitter* et) {
+	p3d_emitter_clear(et);
 	PS_ARRAY_FREE(EMITTER_ARRAY, et);
 }
 
