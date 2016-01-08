@@ -63,7 +63,7 @@ p3d_emitter_create(struct p3d_emitter_cfg* cfg) {
 void 
 p3d_emitter_release(struct p3d_emitter* et) {
 	p3d_emitter_clear(et);
-	free(et);
+	PS_ARRAY_FREE(EMITTER_ARRAY, et);
 }
 
 void 
@@ -375,12 +375,6 @@ p3d_emitter_draw(struct p3d_emitter* et, const void* ud) {
 
 		p = p->next;
 	}
-}
-
-void 
-p3d_emitter_stop(struct p3d_emitter* et) {
-	p3d_emitter_clear(et);
-	PS_ARRAY_FREE(EMITTER_ARRAY, et);
 }
 
 void 

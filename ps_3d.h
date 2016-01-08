@@ -152,8 +152,6 @@ void p3d_emitter_clear(struct p3d_emitter* et);
 void p3d_emitter_update(struct p3d_emitter* et, float dt, float* mat);
 void p3d_emitter_draw(struct p3d_emitter* et, const void* ud);
 
-void p3d_emitter_stop(struct p3d_emitter*);
-
 void p3d_update(float dt);
 void p3d_draw();
 void p3d_clear();
