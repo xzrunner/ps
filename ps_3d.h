@@ -156,6 +156,8 @@ void p3d_update(float dt);
 void p3d_draw();
 void p3d_clear();
 
+bool p3d_emitter_is_finished(struct p3d_emitter*);
+
 #endif // particle_system_3d_h
 
 #ifdef __cplusplus
