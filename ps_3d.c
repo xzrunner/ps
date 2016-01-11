@@ -234,6 +234,9 @@ _update_speed(struct p3d_emitter* et, float dt, struct p3d_particle* p) {
 	float linear_acc = p->cfg.linear_acc * dt;
 	for (int i = 0; i < 3; ++i) {
 		p->spd.xyz[i] += linear_acc * p->spd.xyz[i] / velocity;
+		if (p->spd.xyz[i] < 0) {
+			p->spd.xyz[i] = 0;
+		}
 	}
 
 	_update_disturbance_speed(et, dt, p);
