@@ -81,20 +81,26 @@ p3d_emitter_clear(struct p3d_emitter* et) {
 	et->particle_count = 0;
 }
 
-// static inline void
-// _resume(struct particle_system_3d* et) {
-// 	et->active = true;
-// }
-
-static inline void
-_pause(struct p3d_emitter* et) {
+void 
+p3d_emitter_stop(struct p3d_emitter* et) {
 	et->active = false;
 }
 
-static inline void
-_stop(struct p3d_emitter* et) {
-	_pause(et);
+void 
+p3d_emitter_start(struct p3d_emitter* et) {
+	et->particle_count = 0;
 	et->emit_counter = 0;
+	et->active = true;
+}
+
+void 
+p3d_emitter_pause(struct p3d_emitter* et) {
+	et->active = false;
+}
+
+void 
+p3d_emitter_resume(struct p3d_emitter* et) {
+	et->active = true;
 }
 
 static inline void
@@ -166,9 +172,8 @@ _add_particle(struct p3d_emitter* et, float* mat) {
 		return;
 	}
 
-	if (mat) {
-		memcpy(p->mat, mat, sizeof(p->mat));
-	}
+	assert(mat);
+	memcpy(p->mat, mat, sizeof(p->mat));
 	_init_particle(et, p);
 
 	if (ADD_FUNC) {

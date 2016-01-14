@@ -143,8 +143,15 @@ struct p2d_emitter* p2d_emitter_create(struct p2d_emitter_cfg* cfg);
 void p2d_emitter_release(struct p2d_emitter* et);
 void p2d_emitter_clear(struct p2d_emitter* et);
 
+void p2d_emitter_stop(struct p2d_emitter*);
+void p2d_emitter_start(struct p2d_emitter*);
+void p2d_emitter_pause(struct p2d_emitter*);
+void p2d_emitter_resume(struct p2d_emitter*);
+
 void p2d_emitter_update(struct p2d_emitter* et, float dt, float* mat);
 void p2d_emitter_draw(struct p2d_emitter* et, const void* ud);
+
+bool p2d_emitter_is_finished(struct p2d_emitter*);
 
 #endif // particle_system_2d_h
 

@@ -128,8 +128,7 @@ struct p3d_emitter {
 
 	bool active;
 	bool loop;
-	bool local_mode_draw;
-	char _pad[1];	// unused: dummy for align to 64bit
+	char _pad[2];	// unused: dummy for align to 64bit
 
 	float time;
 
@@ -149,10 +148,13 @@ struct p3d_emitter* p3d_emitter_create(struct p3d_emitter_cfg* cfg);
 void p3d_emitter_release(struct p3d_emitter*);
 void p3d_emitter_clear(struct p3d_emitter*);
 
+void p3d_emitter_stop(struct p3d_emitter*);
+void p3d_emitter_start(struct p3d_emitter*);
+void p3d_emitter_pause(struct p3d_emitter*);
+void p3d_emitter_resume(struct p3d_emitter*);
+
 void p3d_emitter_update(struct p3d_emitter*, float dt, float* mat);
 void p3d_emitter_draw(struct p3d_emitter*, const void* ud);
-
-bool p3d_emitter_is_finished(struct p3d_emitter*);
 
 bool p3d_emitter_is_finished(struct p3d_emitter*);
 

@@ -75,15 +75,26 @@ p2d_emitter_clear(struct p2d_emitter* et) {
 	et->particle_count = 0;
 }
 
-static inline void
-_pause(struct p2d_emitter* et) {
+void 
+p2d_emitter_stop(struct p2d_emitter* et) {
 	et->active = false;
 }
 
-static inline void
-_stop(struct p2d_emitter* et) {
-	_pause(et);
+void 
+p2d_emitter_start(struct p2d_emitter* et) {
+	et->particle_count = 0;
 	et->emit_counter = 0;
+	et->active = true;
+}
+
+void 
+p2d_emitter_pause(struct p2d_emitter* et) {
+	et->active = false;
+}
+
+void 
+p2d_emitter_resume(struct p2d_emitter* et) {
+	et->active = true;
 }
 
 static inline void
@@ -309,4 +320,9 @@ p2d_emitter_draw(struct p2d_emitter* et, const void* ud) {
 		RENDER_FUNC(p->symbol->ud, p->mat, p->position.x, p->position.y, p->angle, p->scale, &p->col_mul, &p->col_add, ud);
 		p = p->next;
 	}
+}
+
+bool 
+p2d_emitter_is_finished(struct p2d_emitter* et) {
+	return !et->loop && et->particle_count >= et->cfg->count && !et->head;
 }
