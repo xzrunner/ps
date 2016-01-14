@@ -38,6 +38,8 @@ struct p3d_particle_cfg {
 
 	float linear_acc;
 
+	float tangential_spd;
+
 	float angular_spd;
 
 	float dis_spd;
@@ -90,7 +92,8 @@ struct p3d_emitter_cfg {
 	float hori, hori_var;
 	float vert, vert_var;
 
-	float spd, spd_var;
+	float radial_spd, radial_spd_var;
+	float tangential_spd, tangential_spd_var;
 	float angular_spd, angular_spd_var;
 
 	float dis_region, dis_region_var;

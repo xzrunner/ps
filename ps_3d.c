@@ -133,8 +133,8 @@ _init_particle(struct p3d_emitter* et, struct p3d_particle* p) {
 
 	_trans_coords2d(et->cfg->start_radius, et->cfg->start_height, p->cfg.dir.x, &p->pos);
 
-	float spd = et->cfg->spd + et->cfg->spd_var * ps_random_m11(&RANDSEED);
-	_trans_coords3d(spd, p->cfg.dir.x, p->cfg.dir.y, &p->spd);
+	float radial_spd = et->cfg->radial_spd + et->cfg->radial_spd_var * ps_random_m11(&RANDSEED);
+	_trans_coords3d(radial_spd, p->cfg.dir.x, p->cfg.dir.y, &p->spd);
 	memcpy(&p->cfg.spd_dir, &p->spd, sizeof(p->spd));
 
 	p->cfg.dis_region = et->cfg->dis_region + et->cfg->dis_region_var * ps_random_m11(&RANDSEED);
@@ -145,6 +145,8 @@ _init_particle(struct p3d_emitter* et, struct p3d_particle* p) {
 	p->cfg.dis_spd = et->cfg->dis_spd + et->cfg->dis_spd_var * ps_random_m11(&RANDSEED);
 
 	p->cfg.linear_acc = et->cfg->linear_acc + et->cfg->linear_acc_var * ps_random_m11(&RANDSEED);
+
+	p->cfg.tangential_spd = et->cfg->tangential_spd + et->cfg->tangential_spd_var * ps_random_m11(&RANDSEED);
 
 	p->cfg.angular_spd = et->cfg->angular_spd + et->cfg->angular_spd_var * ps_random_m11(&RANDSEED);
 
@@ -234,6 +236,16 @@ _update_speed(struct p3d_emitter* et, float dt, struct p3d_particle* p) {
 	// gravity
 	p->spd.z -= et->cfg->gravity * dt;
 
+	// tangential speed
+	struct ps_vec2 tan_spd;
+	tan_spd.x = -p->pos.y;
+	tan_spd.y =  p->pos.x;
+	ps_vec2_normalize(&tan_spd);
+	tan_spd.x *= p->cfg.tangential_spd;
+	tan_spd.y *= p->cfg.tangential_spd;
+	p->spd.x += tan_spd.x;
+	p->spd.y += tan_spd.y;
+	
 	// normal acceleration
 	float velocity = ps_vec3_len(&p->spd);
 	float linear_acc = p->cfg.linear_acc * dt;
