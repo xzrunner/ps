@@ -243,10 +243,8 @@ _update_speed(struct p3d_emitter* et, float dt, struct p3d_particle* p) {
 	ps_vec2_normalize(&tan_spd);
 	tan_spd.x *= p->cfg.tangential_spd;
 	tan_spd.y *= p->cfg.tangential_spd;
-// 	p->spd.x += tan_spd.x;
-// 	p->spd.y += tan_spd.y;
-	p->spd.x = tan_spd.x;
-	p->spd.y = tan_spd.y;
+	p->spd.x += tan_spd.x;
+	p->spd.y += tan_spd.y;
 	
 	// normal acceleration
 	float velocity = ps_vec3_len(&p->spd);
