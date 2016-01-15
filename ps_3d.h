@@ -135,7 +135,7 @@ struct p3d_emitter {
 
 	float time;
 
-	struct p3d_emitter_cfg* cfg;
+	const struct p3d_emitter_cfg* cfg;
 
 	void* ud;
 
@@ -147,7 +147,7 @@ void p3d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float 
 				   void (*add_func)(struct p3d_particle*, void* ud),
 				   void (*remove_func)(struct p3d_particle*, void* ud));
 
-struct p3d_emitter* p3d_emitter_create(struct p3d_emitter_cfg* cfg);
+struct p3d_emitter* p3d_emitter_create(const struct p3d_emitter_cfg* cfg);
 void p3d_emitter_release(struct p3d_emitter*);
 void p3d_emitter_clear(struct p3d_emitter*);
 

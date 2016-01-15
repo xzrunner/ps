@@ -48,7 +48,7 @@ p3d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, fl
 }
 
 struct p3d_emitter* 
-p3d_emitter_create(struct p3d_emitter_cfg* cfg) {
+p3d_emitter_create(const struct p3d_emitter_cfg* cfg) {
 	struct p3d_emitter* et;
 	PS_ARRAY_ALLOC(EMITTER_ARRAY, et);
 	if (!et) {
