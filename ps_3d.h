@@ -142,6 +142,15 @@ struct p3d_emitter {
 	struct p3d_emitter* next;
 };
 
+struct p3d_sprite {
+	struct p3d_emitter* et;
+	bool local_mode_draw;
+	float mat[6];
+	struct p3d_sprite** ud;
+
+	struct p3d_sprite* next;
+};
+
 void p3d_init();
 void p3d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud),
 				   void (*add_func)(struct p3d_particle*, void* ud),
@@ -160,6 +169,9 @@ void p3d_emitter_update(struct p3d_emitter*, float dt, float* mat);
 void p3d_emitter_draw(struct p3d_emitter*, const void* ud);
 
 bool p3d_emitter_is_finished(struct p3d_emitter*);
+
+struct p3d_sprite* p3d_sprite_create();
+void p3d_sprite_release(struct p3d_sprite*);
 
 #endif // particle_system_3d_h
 

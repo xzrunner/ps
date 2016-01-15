@@ -3,8 +3,10 @@
 #include "spritepack.h"
 #include "ej_ps.h"
 
-#include "lua.h"
-#include "lauxlib.h"
+#include <lua.h>
+#include <lauxlib.h>
+
+#include <assert.h>
 
 static int
 lp3d_pause(lua_State* L) {
@@ -23,8 +25,11 @@ lp3d_emitter_release(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
 	if (spr->type == TYPE_PARTICLE3D) {
-		p3d_emitter_release(spr->ext.p3d);
-		spr->ext.p3d = NULL;
+		p3d_emitter_release(spr->data_ext.p3d->et);		
+		p3d_sprite_release(spr->data_ext.p3d);
+		spr->data_ext.p3d = NULL;
+	} else if (spr->type == TYPE_P3D_SPR) {
+		assert(0);
 	}
 	return 0;
 }
@@ -34,7 +39,9 @@ lp3d_emitter_clear_time(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
 	if (spr->type == TYPE_PARTICLE3D) {
-		spr->ext.p3d->time = 0;
+		spr->data_ext.p3d->et->time = 0;
+	} else if (spr->type == TYPE_P3D_SPR) {
+		assert(0);
 	}
 	return 0;
 }
@@ -45,8 +52,10 @@ lp3d_emitter_update(lua_State* L) {
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
 	if (spr->type == TYPE_PARTICLE3D) {
 		float dt = luaL_optnumber(L, 2, 0.033f);
-		p3d_emitter_update(spr->ext.p3d, dt, NULL);
-		spr->ext.p3d->time += dt;
+		p3d_emitter_update(spr->data_ext.p3d->et, dt, NULL);
+		spr->data_ext.p3d->et->time += dt;
+	} else if (spr->type == TYPE_P3D_SPR) {
+		assert(0);
 	}
 	return 0;
 }
@@ -56,7 +65,9 @@ lp3d_emitter_set_loop(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
 	if (spr->type == TYPE_PARTICLE3D) {
-		spr->ext.p3d->loop = lua_toboolean(L, 2);
+		spr->data_ext.p3d->et->loop = lua_toboolean(L, 2);
+	} else if (spr->type == TYPE_P3D_SPR) {
+		assert(0);
 	}
 	return 0;
 }
@@ -66,8 +77,10 @@ lp3d_emitter_is_finished(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
 	if (spr->type == TYPE_PARTICLE3D) {
-		bool finishded = p3d_emitter_is_finished(spr->ext.p3d);
+		bool finishded = p3d_emitter_is_finished(spr->data_ext.p3d->et);
 		lua_pushboolean(L, finishded);
+	} else if (spr->type == TYPE_P3D_SPR) {
+		assert(0);
 	}
 	return 1;
 }

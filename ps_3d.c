@@ -9,9 +9,11 @@
 
 #define MAX_PARTICLE_SZ 10000
 #define MAX_EMITTER_SZ	1000
+#define MAX_SPRITE_SZ	1000
 
-static struct p3d_particle* PARTICLE_ARRAY = NULL;
-static struct p3d_emitter* EMITTER_ARRAY = NULL;
+static struct p3d_particle*	PARTICLE_ARRAY	= NULL;
+static struct p3d_emitter*	EMITTER_ARRAY	= NULL;
+static struct p3d_sprite*	SPRITE_ARRAY	= NULL;
 
 static void (*RENDER_FUNC)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud);
 static void (*ADD_FUNC)(struct p3d_particle*, void* ud);
@@ -36,6 +38,15 @@ p3d_init() {
 	}
 	memset(EMITTER_ARRAY, 0, sz);
 	PS_ARRAY_INIT(EMITTER_ARRAY, MAX_EMITTER_SZ);
+
+	sz = sizeof(struct p3d_sprite) * MAX_SPRITE_SZ;
+	SPRITE_ARRAY = (struct p3d_sprite*)malloc(sz);
+	if (!SPRITE_ARRAY) {
+		printf("malloc err: p3d_init !\n");
+		return;
+	}
+	memset(SPRITE_ARRAY, 0, sz);
+	PS_ARRAY_INIT(SPRITE_ARRAY, MAX_SPRITE_SZ);
 }
 
 void 
@@ -397,4 +408,20 @@ p3d_emitter_draw(struct p3d_emitter* et, const void* ud) {
 bool 
 p3d_emitter_is_finished(struct p3d_emitter* et) {
 	return !et->loop && et->particle_count >= et->cfg->count && !et->head;
+}
+
+struct p3d_sprite* 
+p3d_sprite_create() {
+	struct p3d_sprite* spr;
+	PS_ARRAY_ALLOC(SPRITE_ARRAY, spr);
+	if (!spr) {
+		return NULL;
+	}
+	memset(spr, 0, sizeof(struct p3d_sprite));
+	return spr;
+}
+
+void 
+p3d_sprite_release(struct p3d_sprite* spr) {
+	PS_ARRAY_FREE(SPRITE_ARRAY, spr);
 }

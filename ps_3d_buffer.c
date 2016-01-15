@@ -5,18 +5,14 @@
 #include <string.h>
 #include <assert.h>
 
-#define MAX_BUFFER_SZ 512
-#define REMOVED_EMITTER_TIME -1
-
 static void (*WRAP_RENDER_PARAMS_FUNC)(void* params, float* mat);
 static void* RENDER_PARAMS = NULL;
 
-struct buffer {
-	struct p3d_sprite sprites[MAX_BUFFER_SZ];
-	int sz;
+struct list {
+	struct p3d_sprite *head, *tail;
 };
 
-static struct buffer* BUF;
+static struct list L;
 
 void 
 p3d_buffer_init(void* (*create_render_params_func)(),
@@ -24,64 +20,93 @@ p3d_buffer_init(void* (*create_render_params_func)(),
 	RENDER_PARAMS = create_render_params_func();
 	WRAP_RENDER_PARAMS_FUNC = wrap_render_params_func;
 
-	BUF = (struct buffer*)malloc(sizeof(*BUF));
-	if (!BUF) {
-		return;
-	}
-	memset(BUF, 0, sizeof(*BUF));
+	L.head = L.tail = NULL;
 }
 
-struct p3d_sprite* 
-p3d_buffer_add() {
-	if (BUF->sz >= MAX_BUFFER_SZ) {
-		return NULL;
+void 
+p3d_buffer_insert(struct p3d_sprite* spr) {
+	spr->next = NULL;
+	if (!L.head) {
+		assert(!L.tail);
+		L.head = L.tail = spr;
 	} else {
-		return &BUF->sprites[BUF->sz++];
+		L.tail->next = spr;
+		L.tail = spr;
 	}
+}
+
+static inline void
+_remove(struct p3d_sprite* curr, struct p3d_sprite* prev) {
+	if (curr == L.head) {
+		L.head = curr->next;
+	}
+	if (curr == L.tail) {
+		L.tail = prev;
+	}
+	if (prev) {
+		prev->next = curr->next;
+	}
+	p3d_sprite_release(curr);
 }
 
 void 
 p3d_buffer_remove(struct p3d_sprite* spr) {
-	spr->et->time = REMOVED_EMITTER_TIME;
+	struct p3d_sprite* prev = NULL;
+	struct p3d_sprite* curr = L.head;
+	while (curr && curr != spr) {
+		prev = curr;
+		curr = curr->next;
+	}
+
+	if (curr == spr) {
+		_remove(curr, prev);
+	}
 }
 
 void 
 p3d_buffer_clear() {
-	memset(BUF, 0, sizeof(*BUF));
+	struct p3d_sprite* curr = L.head;
+	while (curr) {
+		struct p3d_sprite* next = curr->next;
+		p3d_sprite_release(curr);
+		curr = next;
+	}
 }
 
 bool 
 p3d_buffer_update(float time) {
 	bool dirty = false;
-	for (int i = 0; i < BUF->sz; ) {
-		struct p3d_sprite* spr = &BUF->sprites[i];
-		struct p3d_emitter* et = spr->et;
-		if (et->time == REMOVED_EMITTER_TIME || p3d_emitter_is_finished(et)) {
-			spr->ud = NULL;
-			BUF->sprites[i] = BUF->sprites[--BUF->sz];
+	struct p3d_sprite* curr = L.head;
+	struct p3d_sprite* prev = NULL;
+	while (curr) {
+		struct p3d_sprite* next = curr->next;
+		struct p3d_emitter* et = curr->et;
+		if (p3d_emitter_is_finished(et)) {
+			_remove(curr, prev);
 		} else {
 			assert(et->time <= time);
 			if (et->time < time) {
 				dirty = true;
 				float dt = time - et->time;
-				p3d_emitter_update(et, dt, spr->mat);
+				p3d_emitter_update(et, dt, curr->mat);
 				et->time = time;
 			}
-			++i;
 		}
+		curr = next;
 	}
 	return dirty;
 }
 
 void 
 p3d_buffer_draw() {
-	for (int i = 0; i < BUF->sz; ++i) {
-		struct p3d_sprite* spr = &BUF->sprites[i];
-		if (spr->local_mode_draw) {
-			WRAP_RENDER_PARAMS_FUNC(RENDER_PARAMS, spr->mat);
-			p3d_emitter_draw(spr->et, RENDER_PARAMS);
+	struct p3d_sprite* curr = L.head;
+	while (curr) {
+		if (curr->local_mode_draw) {
+			WRAP_RENDER_PARAMS_FUNC(RENDER_PARAMS, curr->mat);
+			p3d_emitter_draw(curr->et, RENDER_PARAMS);
 		} else {
-			p3d_emitter_draw(spr->et, NULL);
+			p3d_emitter_draw(curr->et, NULL);
 		}
+		curr = curr->next;
 	}
 }
