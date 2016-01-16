@@ -6,8 +6,6 @@
 #include <lua.h>
 #include <lauxlib.h>
 
-#include <assert.h>
-
 static int
 lp3d_pause(lua_State* L) {
 	ej_ps_pause();
@@ -29,7 +27,7 @@ lp3d_emitter_release(lua_State* L) {
 		p3d_sprite_release(spr->data_ext.p3d);
 		spr->data_ext.p3d = NULL;
 	} else if (spr->type == TYPE_P3D_SPR) {
-		assert(0);
+		luaL_error(L, "Use p3d spr.");
 	}
 	return 0;
 }
@@ -41,7 +39,7 @@ lp3d_emitter_clear_time(lua_State* L) {
 	if (spr->type == TYPE_PARTICLE3D) {
 		spr->data_ext.p3d->et->time = 0;
 	} else if (spr->type == TYPE_P3D_SPR) {
-		assert(0);
+		luaL_error(L, "Use p3d spr.");
 	}
 	return 0;
 }
@@ -55,7 +53,7 @@ lp3d_emitter_update(lua_State* L) {
 		p3d_emitter_update(spr->data_ext.p3d->et, dt, NULL);
 		spr->data_ext.p3d->et->time += dt;
 	} else if (spr->type == TYPE_P3D_SPR) {
-		assert(0);
+		luaL_error(L, "Use p3d spr.");
 	}
 	return 0;
 }
@@ -67,7 +65,7 @@ lp3d_emitter_set_loop(lua_State* L) {
 	if (spr->type == TYPE_PARTICLE3D) {
 		spr->data_ext.p3d->et->loop = lua_toboolean(L, 2);
 	} else if (spr->type == TYPE_P3D_SPR) {
-		assert(0);
+		luaL_error(L, "Use p3d spr.");
 	}
 	return 0;
 }
@@ -80,7 +78,19 @@ lp3d_emitter_is_finished(lua_State* L) {
 		bool finishded = p3d_emitter_is_finished(spr->data_ext.p3d->et);
 		lua_pushboolean(L, finishded);
 	} else if (spr->type == TYPE_P3D_SPR) {
-		assert(0);
+		luaL_error(L, "Use p3d spr.");
+	}
+	return 1;
+}
+
+static int
+lp3d_sprite_set_local(lua_State* L) {
+	luaL_checktype(L, 1, LUA_TUSERDATA);
+	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
+	if (spr->type == TYPE_PARTICLE3D) {
+		spr->data_ext.p3d->local_mode_draw = lua_toboolean(L, 2);
+	} else if (spr->type == TYPE_P3D_SPR) {
+		luaL_error(L, "Use p3d spr.");
 	}
 	return 1;
 }
@@ -98,6 +108,8 @@ luaopen_ps_c(lua_State* L) {
 		{ "p3d_emitter_update", lp3d_emitter_update },
 		{ "p3d_emitter_set_loop", lp3d_emitter_set_loop },
 		{ "p3d_emitter_is_finished", lp3d_emitter_is_finished },
+
+		{ "p3d_sprite_set_local", lp3d_sprite_set_local },
 
 		{ NULL, NULL },
 	};
