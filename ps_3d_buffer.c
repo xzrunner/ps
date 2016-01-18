@@ -46,6 +46,7 @@ _remove(struct p3d_sprite* curr, struct p3d_sprite* prev) {
 	if (prev) {
 		prev->next = curr->next;
 	}
+	p3d_emitter_release(curr->et);
 	p3d_sprite_release(curr);
 }
 
@@ -68,6 +69,7 @@ p3d_buffer_clear() {
 	struct p3d_sprite* curr = L.head;
 	while (curr) {
 		struct p3d_sprite* next = curr->next;
+		p3d_emitter_release(curr->et);
 		p3d_sprite_release(curr);
 		curr = next;
 	}
@@ -101,10 +103,8 @@ void
 p3d_buffer_draw() {
 	struct p3d_sprite* curr = L.head;
 	while (curr) {
-		if (curr->local_mode_draw) {
+		if (curr->draw_params) {
 			p3d_emitter_draw(curr->et, curr->draw_params);
-		} else {
-			p3d_emitter_draw(curr->et, NULL);
 		}
 		curr = curr->next;
 	}

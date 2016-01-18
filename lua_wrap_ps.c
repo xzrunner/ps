@@ -29,8 +29,10 @@ lp3d_emitter_release(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
 	if (spr->type == TYPE_P3D_SPR) {
-		p3d_emitter_release(spr->data_ext.p3d->et);		
-		p3d_sprite_release(spr->data_ext.p3d);
+		struct p3d_sprite* p3d = spr->data_ext.p3d;
+		p3d_buffer_remove(p3d);
+		p3d_emitter_release(p3d->et);
+		p3d_sprite_release(p3d);
 		spr->data_ext.p3d = NULL;
 	} else if (spr->type == TYPE_P3D_SPR) {
 		luaL_error(L, "Use p3d sym.");
