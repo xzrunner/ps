@@ -1,7 +1,11 @@
 #include "ps_3d.h"
+#include "ps_3d_sprite.h"
+#include "ps_3d_buffer.h"
 #include "sprite.h"
 #include "spritepack.h"
 #include "ej_ps.h"
+
+#include <dtex_package.h>
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -97,6 +101,32 @@ lp3d_sprite_set_local(lua_State* L) {
 	return 1;
 }
 
+static int
+lp3d_sprite_set_alone(lua_State* L) {
+	luaL_checktype(L, 1, LUA_TUSERDATA);
+	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
+	if (spr->type == TYPE_P3D_SPR) {
+		bool alone = lua_toboolean(L, 2);
+		spr->pkg->ej_pkg;
+		struct pack_p3d_spr* spr_cfg = (struct pack_p3d_spr*)(spr->pkg->ej_pkg->data[spr->id]);
+		if (spr_cfg->alone != alone) {
+			spr_cfg->alone = alone;
+			if (alone) {
+				p3d_buffer_insert(spr->data_ext.p3d);
+			}
+		}
+	} else if (spr->type == TYPE_P3D_SPR) {
+		luaL_error(L, "Use p3d sym.");
+	}
+	return 0;
+}
+
+static int
+lp3d_buffer_draw(lua_State* L) {
+	p3d_buffer_draw();
+	return 0;
+}
+
 int
 luaopen_ps_c(lua_State* L) {
 	luaL_checkversion(L);
@@ -112,6 +142,9 @@ luaopen_ps_c(lua_State* L) {
 		{ "p3d_emitter_is_finished", lp3d_emitter_is_finished },
 
 		{ "p3d_sprite_set_local", lp3d_sprite_set_local },
+		{ "p3d_sprite_set_alone", lp3d_sprite_set_alone },
+
+		{ "p3d_buffer_draw", lp3d_buffer_draw },
 
 		{ NULL, NULL },
 	};

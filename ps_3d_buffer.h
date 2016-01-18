@@ -8,10 +8,7 @@ extern "C"
 
 #include <stdbool.h>
 
-struct p3d_sprite;
-
-void p3d_buffer_init(void* (*create_render_params_func)(),
-					 void (*wrap_render_params_func)(void* params, float* mat));
+void p3d_buffer_init();
 
 void p3d_buffer_insert(struct p3d_sprite*);
 void p3d_buffer_remove(struct p3d_sprite*);

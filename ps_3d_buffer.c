@@ -1,12 +1,12 @@
 #include "ps_3d_buffer.h"
 #include "ps_3d.h"
+#include "ps_3d_sprite.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
-static void (*WRAP_RENDER_PARAMS_FUNC)(void* params, float* mat);
-static void* RENDER_PARAMS = NULL;
+#include <stdio.h>
 
 struct list {
 	struct p3d_sprite *head, *tail;
@@ -15,16 +15,16 @@ struct list {
 static struct list L;
 
 void 
-p3d_buffer_init(void* (*create_render_params_func)(),
-				void (*wrap_render_params_func)(void* params, float* mat)) {
-	RENDER_PARAMS = create_render_params_func();
-	WRAP_RENDER_PARAMS_FUNC = wrap_render_params_func;
-
+p3d_buffer_init(void (*create_draw_params_func)(),
+				void (*release_draw_params_func)()) {
 	L.head = L.tail = NULL;
 }
 
 void 
 p3d_buffer_insert(struct p3d_sprite* spr) {
+	if (!spr->draw_params) {
+		p3d_sprite_create_draw_params(spr);
+	}
 	spr->next = NULL;
 	if (!L.head) {
 		assert(!L.tail);
@@ -81,7 +81,7 @@ p3d_buffer_update(float time) {
 	while (curr) {
 		struct p3d_sprite* next = curr->next;
 		struct p3d_emitter* et = curr->et;
-		if (p3d_emitter_is_finished(et)) {
+		if (!et || p3d_emitter_is_finished(et)) {
 			_remove(curr, prev);
 		} else {
 			assert(et->time <= time);
@@ -102,8 +102,7 @@ p3d_buffer_draw() {
 	struct p3d_sprite* curr = L.head;
 	while (curr) {
 		if (curr->local_mode_draw) {
-			WRAP_RENDER_PARAMS_FUNC(RENDER_PARAMS, curr->mat);
-			p3d_emitter_draw(curr->et, RENDER_PARAMS);
+			p3d_emitter_draw(curr->et, curr->draw_params);
 		} else {
 			p3d_emitter_draw(curr->et, NULL);
 		}
