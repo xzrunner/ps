@@ -52,7 +52,10 @@ p3d_sprite_release(struct p3d_sprite* spr) {
 	}
 	//--count;
 	//printf("del %d %p\n", count, spr);
-	*spr->ptr_self = NULL;
+
+	p3d_buffer_remove(spr);
+
+	*(spr->ptr_self) = NULL;
 	PS_ARRAY_FREE(SPRITE_ARRAY, spr);
 }
 
