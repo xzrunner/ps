@@ -7,6 +7,8 @@ extern "C"
 #define particle_system_3d_buffer_h
 
 #include <stdbool.h>
+    
+struct p3d_sprite;
 
 void p3d_buffer_init();
 
