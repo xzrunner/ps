@@ -1,5 +1,6 @@
 #include "ps_3d_sprite.h"
 #include "ps_array.h"
+#include "ps_3d_buffer.h"
 
 #include <stdio.h>
 #include <stdlib.h>
