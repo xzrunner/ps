@@ -111,14 +111,8 @@ lp3d_sprite_set_alone(lua_State* L) {
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
 	if (spr->type == TYPE_P3D_SPR) {
 		bool alone = lua_toboolean(L, 2);
-		spr->pkg->ej_pkg;
 		struct pack_p3d_spr* spr_cfg = (struct pack_p3d_spr*)(spr->pkg->ej_pkg->data[spr->id]);
-		if (spr_cfg->alone != alone) {
-			spr_cfg->alone = alone;
-			if (alone) {
-				p3d_buffer_insert(spr->data_ext.p3d);
-			}
-		}
+		spr->s.p3d_spr->alone = alone;
 	} else if (spr->type == TYPE_P3D_SPR) {
 		luaL_error(L, "Use p3d sym.");
 	}
@@ -127,7 +121,10 @@ lp3d_sprite_set_alone(lua_State* L) {
 
 static int
 lp3d_buffer_draw(lua_State* L) {
-	p3d_buffer_draw();
+	double x = luaL_optnumber(L, 1, 0);
+	double y = luaL_optnumber(L, 2, 0);
+	double s = luaL_optnumber(L, 3, 1);
+	p3d_buffer_draw(x, y, s);
 	return 0;
 }
 

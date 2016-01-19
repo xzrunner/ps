@@ -14,9 +14,12 @@ struct list {
 
 static struct list L;
 
+static void (*UPDATE_SRT_FUNC)(void* params, float x, float y, float scale);
+
 void 
-p3d_buffer_init(void (*create_draw_params_func)(),
-				void (*release_draw_params_func)()) {
+p3d_buffer_init(void (*update_srt_func)(void* params, float x, float y, float scale)) {
+	UPDATE_SRT_FUNC = update_srt_func;
+
 	L.head = L.tail = NULL;
 }
 
@@ -84,12 +87,16 @@ p3d_buffer_update(float time) {
 			_remove(curr, prev);
 			p3d_sprite_release(curr);
 		} else {
-			assert(et->time <= time);
-			if (et->time < time) {
-				dirty = true;
-				float dt = time - et->time;
-				p3d_emitter_update(et, dt, curr->mat);
+			if (et->time == 0) {
 				et->time = time;
+			} else {
+				assert(et->time <= time);
+				if (et->time < time) {
+					dirty = true;
+					float dt = time - et->time;
+					p3d_emitter_update(et, dt, curr->mat);
+					et->time = time;
+				}
 			}
 			prev = curr;
 		}
@@ -99,10 +106,11 @@ p3d_buffer_update(float time) {
 }
 
 void 
-p3d_buffer_draw() {
+p3d_buffer_draw(float x, float y, float scale) {
 	struct p3d_sprite* curr = L.head;
 	while (curr) {
 		if (curr->draw_params) {
+			UPDATE_SRT_FUNC(curr->draw_params, x, y, scale);
 			p3d_emitter_draw(curr->et, curr->draw_params);
 		}
 		curr = curr->next;
