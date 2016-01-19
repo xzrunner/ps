@@ -1,4 +1,5 @@
 #include "ps_3d_sprite.h"
+#include "ps_3d.h"
 #include "ps_array.h"
 
 #include <stdio.h>
@@ -46,6 +47,10 @@ p3d_sprite_create() {
 
 void 
 p3d_sprite_release(struct p3d_sprite* spr) {
+	assert(spr->et);
+	p3d_emitter_release(spr->et);
+	spr->et = NULL;
+
 	if (spr->draw_params) {
 		RELEASE_DRAW_PARAMS_FUNC(spr->draw_params);
 		spr->draw_params = NULL;
