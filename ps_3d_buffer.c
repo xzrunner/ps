@@ -46,7 +46,6 @@ _remove(struct p3d_sprite* curr, struct p3d_sprite* prev) {
 	if (prev) {
 		prev->next = curr->next;
 	}
-	p3d_sprite_release(curr);
 }
 
 void 
@@ -83,6 +82,7 @@ p3d_buffer_update(float time) {
 		struct p3d_emitter* et = curr->et;
 		if (!et || p3d_emitter_is_finished(et)) {
 			_remove(curr, prev);
+			p3d_sprite_release(curr);
 		} else {
 			assert(et->time <= time);
 			if (et->time < time) {
