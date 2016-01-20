@@ -20,8 +20,8 @@ struct p3d_sprite {
 	struct p3d_sprite* next;
 };
 
-void p3d_sprite_init(void* (*create_draw_params_func)(),
-					 void (*release_draw_params_func)(void* params));
+void p3d_sprite_init(void (*create_draw_params_func)(struct p3d_sprite*),
+					 void (*release_draw_params_func)(struct p3d_sprite*));
 
 struct p3d_sprite* p3d_sprite_create();
 void p3d_sprite_release(struct p3d_sprite*);

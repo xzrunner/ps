@@ -11,12 +11,12 @@
 
 static struct p3d_sprite* SPRITE_ARRAY = NULL;
 
-static void* (*CREATE_DRAW_PARAMS_FUNC)();
-static void (*RELEASE_DRAW_PARAMS_FUNC)(void* params);
+static void (*CREATE_DRAW_PARAMS_FUNC)(struct p3d_sprite*);
+static void (*RELEASE_DRAW_PARAMS_FUNC)(struct p3d_sprite*);
 
 void 
-p3d_sprite_init(void* (*create_draw_params_func)(),
-				void (*release_draw_params_func)(void* params)) {
+p3d_sprite_init(void (*create_draw_params_func)(struct p3d_sprite* spr),
+				void (*release_draw_params_func)(struct p3d_sprite* spr)) {
 	CREATE_DRAW_PARAMS_FUNC = create_draw_params_func;
 	RELEASE_DRAW_PARAMS_FUNC = release_draw_params_func;
 
@@ -52,8 +52,7 @@ p3d_sprite_release(struct p3d_sprite* spr) {
 	spr->et = NULL;
 
 	if (spr->draw_params) {
-		RELEASE_DRAW_PARAMS_FUNC(spr->draw_params);
-		spr->draw_params = NULL;
+		RELEASE_DRAW_PARAMS_FUNC(spr);
 	}
 	//--count;
 	//printf("del %d %p\n", count, spr);
@@ -65,5 +64,5 @@ p3d_sprite_release(struct p3d_sprite* spr) {
 void 
 p3d_sprite_create_draw_params(struct p3d_sprite* spr) {
 	assert(!spr->draw_params);
-	spr->draw_params = CREATE_DRAW_PARAMS_FUNC();
+	CREATE_DRAW_PARAMS_FUNC(spr);
 }
