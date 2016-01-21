@@ -18,6 +18,8 @@ struct p3d_sprite {
 	struct p3d_sprite** ptr_self;
 
 	struct p3d_sprite* next;
+
+	int ref_id;
 };
 
 void p3d_sprite_init(void (*create_draw_params_func)(struct p3d_sprite*),

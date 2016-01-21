@@ -15,10 +15,13 @@ struct list {
 static struct list L;
 
 static void (*UPDATE_SRT_FUNC)(void* params, float x, float y, float scale);
+static void (*REMOVE_FUNC)(struct p3d_sprite*);
 
 void 
-p3d_buffer_init(void (*update_srt_func)(void* params, float x, float y, float scale)) {
+p3d_buffer_init(void (*update_srt_func)(void* params, float x, float y, float scale),
+				void (*remove_func)(struct p3d_sprite*)) {
 	UPDATE_SRT_FUNC = update_srt_func;
+	REMOVE_FUNC = remove_func;
 
 	L.head = L.tail = NULL;
 }
@@ -49,6 +52,8 @@ _remove(struct p3d_sprite* curr, struct p3d_sprite* prev) {
 	if (prev) {
 		prev->next = curr->next;
 	}
+
+	REMOVE_FUNC(curr);
 }
 
 void 
@@ -71,6 +76,7 @@ p3d_buffer_clear() {
 	while (curr) {
 		struct p3d_sprite* next = curr->next;
 		p3d_sprite_release(curr);
+		REMOVE_FUNC(curr);
 		curr = next;
 	}
 }
@@ -102,6 +108,7 @@ p3d_buffer_update(float time) {
 		}
 		curr = next;
 	}
+
 	return dirty;
 }
 
@@ -115,4 +122,16 @@ p3d_buffer_draw(float x, float y, float scale) {
 		}
 		curr = curr->next;
 	}
+}
+
+bool 
+p3d_buffer_query(struct p3d_sprite* spr) {
+	struct p3d_sprite* curr = L.head;
+	while (curr) {
+		if (curr == spr) {
+			return true;
+		}
+		curr = curr->next;
+	}
+	return false;
 }

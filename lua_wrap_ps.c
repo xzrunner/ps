@@ -28,17 +28,18 @@ static int
 lp3d_emitter_release(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
-	if (spr->type == TYPE_P3D_SPR) {
-		struct p3d_sprite* p3d = spr->data_ext.p3d;
-		// already release from buffer
-		if (p3d->et) {
-			p3d_buffer_remove(p3d);
-			p3d_sprite_release(p3d);
-		}
-		spr->data_ext.p3d = NULL;
-	} else if (spr->type == TYPE_P3D_SPR) {
-		luaL_error(L, "Use p3d sym.");
+	if (spr->type != TYPE_P3D_SPR) {
+		return 0;
 	}
+
+	struct p3d_sprite* p3d = spr->data_ext.p3d;
+	// already release from buffer
+	if (p3d->et) {
+		p3d_buffer_remove(p3d);
+		p3d_sprite_release(p3d);
+	}
+	spr->data_ext.p3d = NULL;
+
 	return 0;
 }
 
@@ -46,11 +47,12 @@ static int
 lp3d_emitter_clear_time(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
-	if (spr->type == TYPE_P3D_SPR) {
-		spr->data_ext.p3d->et->time = 0;
-	} else if (spr->type == TYPE_P3D_SPR) {
-		luaL_error(L, "Use p3d sym.");
+	if (spr->type != TYPE_P3D_SPR) {
+		return 0;
 	}
+
+	spr->data_ext.p3d->et->time = 0;
+
 	return 0;
 }
 
@@ -58,13 +60,14 @@ static int
 lp3d_emitter_update(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
-	if (spr->type == TYPE_P3D_SPR) {
-		float dt = luaL_optnumber(L, 2, 0.033f);
-		p3d_emitter_update(spr->data_ext.p3d->et, dt, NULL);
-		spr->data_ext.p3d->et->time += dt;
-	} else if (spr->type == TYPE_P3D_SPR) {
-		luaL_error(L, "Use p3d sym.");
+	if (spr->type != TYPE_P3D_SPR) {
+		return 0;
 	}
+
+	float dt = luaL_optnumber(L, 2, 0.033f);
+	p3d_emitter_update(spr->data_ext.p3d->et, dt, NULL);
+	spr->data_ext.p3d->et->time += dt;
+
 	return 0;
 }
 
@@ -72,11 +75,12 @@ static int
 lp3d_emitter_set_loop(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
-	if (spr->type == TYPE_P3D_SPR) {
-		spr->data_ext.p3d->et->loop = lua_toboolean(L, 2);
-	} else if (spr->type == TYPE_P3D_SPR) {
-		luaL_error(L, "Use p3d sym.");
+	if (spr->type != TYPE_P3D_SPR) {
+		return 0;
 	}
+
+	spr->data_ext.p3d->et->loop = lua_toboolean(L, 2);
+
 	return 0;
 }
 
@@ -84,12 +88,14 @@ static int
 lp3d_emitter_is_finished(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
-	if (spr->type == TYPE_P3D_SPR) {
-		bool finishded = p3d_emitter_is_finished(spr->data_ext.p3d->et);
-		lua_pushboolean(L, finishded);
-	} else if (spr->type == TYPE_P3D_SPR) {
-		luaL_error(L, "Use p3d sym.");
+	if (spr->type != TYPE_P3D_SPR) {
+		lua_pushboolean(L, true);
+		return 1;
 	}
+
+	bool finishded = p3d_emitter_is_finished(spr->data_ext.p3d->et);
+	lua_pushboolean(L, finishded);
+
 	return 1;
 }
 
@@ -97,11 +103,12 @@ static int
 lp3d_sprite_set_local(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
-	if (spr->type == TYPE_P3D_SPR) {
-		spr->data_ext.p3d->local_mode_draw = lua_toboolean(L, 2);
-	} else if (spr->type == TYPE_P3D_SPR) {
-		luaL_error(L, "Use p3d sym.");
+	if (spr->type != TYPE_P3D_SPR) {
+		return 0;
 	}
+
+	spr->data_ext.p3d->local_mode_draw = lua_toboolean(L, 2);
+
 	return 0;
 }
 
@@ -109,13 +116,20 @@ static int
 lp3d_sprite_set_alone(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TUSERDATA);
 	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
-	if (spr->type == TYPE_P3D_SPR) {
-		bool alone = lua_toboolean(L, 2);
-		struct pack_p3d_spr* spr_cfg = (struct pack_p3d_spr*)(spr->pkg->ej_pkg->data[spr->id]);
-		spr->s.p3d_spr->alone = alone;
-	} else if (spr->type == TYPE_P3D_SPR) {
-		luaL_error(L, "Use p3d sym.");
+	if (spr->type != TYPE_P3D_SPR) {
+		return 0;
 	}
+
+	bool alone = lua_toboolean(L, 2);
+	if (alone == spr->s.p3d_spr->alone) {
+		return 0;
+	}
+
+	if (alone) {
+		spr->data_ext.p3d->ref_id = ej_sprite_sprite_ref(1);
+	}
+	spr->s.p3d_spr->alone = alone;
+
 	return 0;
 }
 
