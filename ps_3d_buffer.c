@@ -79,6 +79,7 @@ p3d_buffer_clear() {
 		REMOVE_FUNC(curr);
 		curr = next;
 	}
+	L.head = L.tail = NULL;
 }
 
 bool 
