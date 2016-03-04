@@ -9,8 +9,6 @@ extern "C"
 #include <stdint.h>
 #include <math.h>
 
-#define PI 3.1415926
-
 #define PTR_SIZE_DIFF (8 - sizeof(void *))
 #define SIZEOF_POINTER 8
 

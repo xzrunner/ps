@@ -10,6 +10,8 @@
 #define MAX_PARTICLE_SZ 10000
 #define MAX_EMITTER_SZ	1000
 
+#define PI 3.1415926
+
 static struct p3d_particle*	PARTICLE_ARRAY	= NULL;
 static struct p3d_emitter*	EMITTER_ARRAY	= NULL;
 
