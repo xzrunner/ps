@@ -176,7 +176,7 @@ _init_particle(struct p2d_emitter* et, struct p2d_particle* p) {
 }
 
 static inline void
-_add_particle(struct p2d_emitter* et, float* mat) {
+_add_particle_random(struct p2d_emitter* et, float* mat) {
 	if (!et->cfg->symbol_count) {
 		return;
 	}
@@ -281,7 +281,7 @@ p2d_emitter_update(struct p2d_emitter* et, float dt, float* mat) {
 		et->emit_counter += dt;
 		while (et->emit_counter > rate) {
 			++et->particle_count;
-			_add_particle(et, mat);
+			_add_particle_random(et, mat);
 			et->emit_counter -= rate;
 		}
 	}

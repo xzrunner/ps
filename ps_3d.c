@@ -101,6 +101,7 @@ p3d_emitter_start(struct p3d_emitter* et) {
 	et->particle_count = 0;
 	et->emit_counter = 0;
 	et->active = true;
+	et->const_added = false;
 }
 
 void 
@@ -130,10 +131,14 @@ _trans_coords2d(float r, float h, float hori, struct ps_vec3* pos) {
 }
 
 static inline void
-_init_particle(struct p3d_emitter* et, struct p3d_particle* p) {
+_init_particle(struct p3d_emitter* et, struct p3d_particle* p, struct p3d_symbol* symbol) {
 	uint32_t RANDSEED = rand();
 
-	p->cfg.symbol = (struct p3d_symbol*)(et->cfg->symbols + RANDSEED % et->cfg->symbol_count);
+	if (symbol) {
+		p->cfg.symbol = symbol;
+	} else {
+		p->cfg.symbol = (struct p3d_symbol*)(et->cfg->symbols + RANDSEED % et->cfg->symbol_count);
+	}
 
 	p->life = et->cfg->life + et->cfg->life_var * ps_random_m11(&RANDSEED);
 	p->cfg.lifetime = p->life;
@@ -172,12 +177,8 @@ _init_particle(struct p3d_emitter* et, struct p3d_particle* p) {
 // 	}
 }
 
-static inline void
-_add_particle(struct p3d_emitter* et, float* mat) {
-	if (!et->cfg->symbol_count) {
-		return;
-	}
-
+static void
+_add_particle(struct p3d_emitter* et, float* mat, struct p3d_symbol* sym) {
 	struct p3d_particle* p;
 	PS_ARRAY_ALLOC(PARTICLE_ARRAY, p);
 	if (!p) {
@@ -186,7 +187,7 @@ _add_particle(struct p3d_emitter* et, float* mat) {
 
 	assert(mat);
 	memcpy(p->mat, mat, sizeof(p->mat));
-	_init_particle(et, p);
+	_init_particle(et, p, sym);
 
 	if (ADD_FUNC) {
 		ADD_FUNC(p, et->ud);
@@ -201,6 +202,25 @@ _add_particle(struct p3d_emitter* et, float* mat) {
 		et->tail->next = p;
 		et->tail = p;
 	}
+}
+
+static void
+_add_particle_static(struct p3d_emitter* et, float* mat) {
+	for (int i = 0; i < et->cfg->symbol_count; ++i) {
+		struct p3d_symbol* sym = &et->cfg->symbols[i];
+		for (int j = 0; j < sym->count; ++j) {
+			_add_particle(et, mat, sym);
+		}
+	}
+}
+
+static inline void
+_add_particle_random(struct p3d_emitter* et, float* mat) {
+	if (!et->cfg->symbol_count) {
+		return;
+	}
+
+	_add_particle(et, mat, NULL);
 }
 
 static inline void
@@ -333,14 +353,21 @@ p3d_emitter_update(struct p3d_emitter* et, float dt, float* mat) {
 		et->emit_counter += dt;
 		if (et->loop) {
 			while (et->emit_counter > rate) {
-				_add_particle(et, mat);
+				_add_particle_random(et, mat);
 				et->emit_counter -= rate;
 			}
 		} else {
-			while (et->emit_counter > rate && et->particle_count < et->cfg->count) {
-				_add_particle(et, mat);
-				++et->particle_count;
-				et->emit_counter -= rate;
+			if (!et->cfg->static_mode) {
+				while (et->emit_counter > rate && et->particle_count < et->cfg->count) {
+					_add_particle_random(et, mat);
+					++et->particle_count;
+					et->emit_counter -= rate;
+				}
+			} else {
+				if (!et->const_added) {
+					_add_particle_static(et, mat);
+					et->const_added = true;
+				}
 			}
 		}
 	}

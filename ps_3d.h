@@ -13,6 +13,9 @@ extern "C"
 struct p3d_emitter_cfg;
 
 struct p3d_symbol {
+	int count;
+	int _dummy;		// unused: dummy for align to 64bit
+
 	float scale_start, scale_end;
 
 	float angle, angle_var;
@@ -84,6 +87,9 @@ enum GROUND_TYPE {
 };
 
 struct p3d_emitter_cfg {
+	bool static_mode;
+	char _pad[3];		// unused: dummy for align to 64bit
+
 	float emission_time;
 	int count;
 
@@ -126,12 +132,16 @@ struct p3d_emitter_cfg {
 struct p3d_emitter {
 	struct p3d_particle *head, *tail;
 
+	// not static mode
 	float emit_counter;
 	int particle_count;
 
+	// static mode
+	bool const_added;
+
 	bool active;
 	bool loop;
-	char _pad[2];	// unused: dummy for align to 64bit
+	char _pad[1];	// unused: dummy for align to 64bit
 
 	float time;
 
