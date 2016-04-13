@@ -101,7 +101,7 @@ p3d_emitter_start(struct p3d_emitter* et) {
 	et->particle_count = 0;
 	et->emit_counter = 0;
 	et->active = true;
-	et->const_added = false;
+	et->static_mode_finished = false;
 }
 
 void 
@@ -364,9 +364,9 @@ p3d_emitter_update(struct p3d_emitter* et, float dt, float* mat) {
 					et->emit_counter -= rate;
 				}
 			} else {
-				if (!et->const_added) {
+				if (!et->static_mode_finished) {
 					_add_particle_static(et, mat);
-					et->const_added = true;
+					et->static_mode_finished = true;
 				}
 			}
 		}

@@ -137,7 +137,7 @@ struct p3d_emitter {
 	int particle_count;
 
 	// static mode
-	bool const_added;
+	bool static_mode_finished;
 
 	bool active;
 	bool loop;
