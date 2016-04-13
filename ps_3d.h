@@ -88,7 +88,7 @@ enum GROUND_TYPE {
 
 struct p3d_emitter_cfg {
 	bool static_mode;
-	char _pad[3];		// unused: dummy for align to 64bit
+	char _pad[7];		// unused: dummy for align to 64bit
 
 	float emission_time;
 	int count;
