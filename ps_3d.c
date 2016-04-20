@@ -7,8 +7,10 @@
 #include <string.h>
 #include <assert.h>
 
-#define MAX_PARTICLE_SZ 10000
-#define MAX_EMITTER_SZ	1000
+// #define MAX_PARTICLE_SZ 10000
+// #define MAX_EMITTER_SZ	1000
+#define MAX_PARTICLE_SZ 100000
+#define MAX_EMITTER_SZ	10000
 
 #define PI 3.1415926
 
