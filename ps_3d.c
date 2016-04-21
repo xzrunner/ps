@@ -60,7 +60,7 @@ p3d_clear() {
 	PS_ARRAY_INIT(EMITTER_ARRAY_HEAD, MAX_EMITTER_SZ);
 }
 
-//static int et_count = 0;
+static int et_count = 0;
 
 struct p3d_emitter* 
 p3d_emitter_create(const struct p3d_emitter_cfg* cfg) {
@@ -69,8 +69,8 @@ p3d_emitter_create(const struct p3d_emitter_cfg* cfg) {
 	if (!et) {
 		return NULL;
 	}
-	//++et_count;
-	//printf("++ add %d %p \n", et_count, et);
+	++et_count;
+	printf("++ add %d %p \n", et_count, et);
 	memset(et, 0, sizeof(struct p3d_emitter));
 	et->loop = true;
 	et->cfg = cfg;
@@ -79,8 +79,8 @@ p3d_emitter_create(const struct p3d_emitter_cfg* cfg) {
 
 void 
 p3d_emitter_release(struct p3d_emitter* et) {
-	//--et_count;
-	//printf("-- del %d %p\n", et_count, et);
+	--et_count;
+	printf("-- del %d %p\n", et_count, et);
 
 	p3d_emitter_clear(et);
 	PS_ARRAY_FREE(EMITTER_ARRAY, et);
