@@ -23,20 +23,23 @@ static void (*REMOVE_FUNC)(struct p3d_particle*, void* ud);
 
 void 
 p3d_init() {
-	int sz = sizeof(struct p3d_particle) * MAX_PARTICLE_SZ;
-	PARTICLE_ARRAY_HEAD = PARTICLE_ARRAY = (struct p3d_particle*)malloc(sz);
-	if (!PARTICLE_ARRAY) {
-		printf("malloc err: p3d_init !\n");
-		return;
-	}
-
-	sz = sizeof(struct p3d_emitter) * MAX_EMITTER_SZ;
-	EMITTER_ARRAY_HEAD = EMITTER_ARRAY = (struct p3d_emitter*)malloc(sz);
-	if (!EMITTER_ARRAY) {
-		printf("malloc err: p3d_init !\n");
-		return;
-	}
-
+    if (!PARTICLE_ARRAY_HEAD) {
+        int sz = sizeof(struct p3d_particle) * MAX_PARTICLE_SZ;
+        PARTICLE_ARRAY_HEAD = (struct p3d_particle*)malloc(sz);
+        if (!PARTICLE_ARRAY_HEAD) {
+            printf("malloc err: p3d_init !\n");
+            return;
+        }
+    }
+    if (!EMITTER_ARRAY_HEAD) {
+        int sz = sizeof(struct p3d_emitter) * MAX_EMITTER_SZ;
+        EMITTER_ARRAY_HEAD = (struct p3d_emitter*)malloc(sz);
+        if (!EMITTER_ARRAY_HEAD) {
+            printf("malloc err: p3d_init !\n");
+            return;
+        }
+    }
+    
 	p3d_clear();
 }
 
@@ -54,10 +57,12 @@ p3d_clear() {
 	int sz = sizeof(struct p3d_particle) * MAX_PARTICLE_SZ;
 	memset(PARTICLE_ARRAY_HEAD, 0, sz);
 	PS_ARRAY_INIT(PARTICLE_ARRAY_HEAD, MAX_PARTICLE_SZ);
+    PARTICLE_ARRAY = PARTICLE_ARRAY_HEAD;
 
 	sz = sizeof(struct p3d_emitter) * MAX_EMITTER_SZ;
 	memset(EMITTER_ARRAY_HEAD, 0, sz);
 	PS_ARRAY_INIT(EMITTER_ARRAY_HEAD, MAX_EMITTER_SZ);
+    EMITTER_ARRAY = EMITTER_ARRAY_HEAD;
 }
 
 static int et_count = 0;
