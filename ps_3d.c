@@ -7,15 +7,15 @@
 #include <string.h>
 #include <assert.h>
 
-// #define MAX_PARTICLE_SZ 10000
-// #define MAX_EMITTER_SZ	1000
-#define MAX_PARTICLE_SZ 100000
-#define MAX_EMITTER_SZ	10000
+#define MAX_PARTICLE_SZ 10000
+#define MAX_EMITTER_SZ	1000
 
 #define PI 3.1415926
 
-static struct p3d_particle*	PARTICLE_ARRAY	= NULL;
-static struct p3d_emitter*	EMITTER_ARRAY	= NULL;
+static struct p3d_particle*	PARTICLE_ARRAY		= NULL;
+static struct p3d_particle*	PARTICLE_ARRAY_HEAD	= NULL;
+static struct p3d_emitter*	EMITTER_ARRAY		= NULL;
+static struct p3d_emitter*	EMITTER_ARRAY_HEAD	= NULL;
 
 static void (*RENDER_FUNC)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud);
 static void (*ADD_FUNC)(struct p3d_particle*, void* ud);
@@ -24,22 +24,20 @@ static void (*REMOVE_FUNC)(struct p3d_particle*, void* ud);
 void 
 p3d_init() {
 	int sz = sizeof(struct p3d_particle) * MAX_PARTICLE_SZ;
-	PARTICLE_ARRAY = (struct p3d_particle*)malloc(sz);
+	PARTICLE_ARRAY_HEAD = PARTICLE_ARRAY = (struct p3d_particle*)malloc(sz);
 	if (!PARTICLE_ARRAY) {
 		printf("malloc err: p3d_init !\n");
 		return;
 	}
-	memset(PARTICLE_ARRAY, 0, sz);
-	PS_ARRAY_INIT(PARTICLE_ARRAY, MAX_PARTICLE_SZ);
 
 	sz = sizeof(struct p3d_emitter) * MAX_EMITTER_SZ;
-	EMITTER_ARRAY = (struct p3d_emitter*)malloc(sz);
+	EMITTER_ARRAY_HEAD = EMITTER_ARRAY = (struct p3d_emitter*)malloc(sz);
 	if (!EMITTER_ARRAY) {
 		printf("malloc err: p3d_init !\n");
 		return;
 	}
-	memset(EMITTER_ARRAY, 0, sz);
-	PS_ARRAY_INIT(EMITTER_ARRAY, MAX_EMITTER_SZ);
+
+	p3d_clear();
 }
 
 void 
@@ -51,12 +49,22 @@ p3d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, fl
 	REMOVE_FUNC = remove_func;
 }
 
+void 
+p3d_clear() {
+	int sz = sizeof(struct p3d_particle) * MAX_PARTICLE_SZ;
+	memset(PARTICLE_ARRAY_HEAD, 0, sz);
+	PS_ARRAY_INIT(PARTICLE_ARRAY_HEAD, MAX_PARTICLE_SZ);
+
+	sz = sizeof(struct p3d_emitter) * MAX_EMITTER_SZ;
+	memset(EMITTER_ARRAY_HEAD, 0, sz);
+	PS_ARRAY_INIT(EMITTER_ARRAY_HEAD, MAX_EMITTER_SZ);
+}
 
 //static int et_count = 0;
 
 struct p3d_emitter* 
 p3d_emitter_create(const struct p3d_emitter_cfg* cfg) {
-	struct p3d_emitter* et;
+	struct p3d_emitter* et;	
 	PS_ARRAY_ALLOC(EMITTER_ARRAY, et);
 	if (!et) {
 		return NULL;

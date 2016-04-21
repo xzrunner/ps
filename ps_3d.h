@@ -156,6 +156,7 @@ void p3d_init();
 void p3d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud),
 				   void (*add_func)(struct p3d_particle*, void* ud),
 				   void (*remove_func)(struct p3d_particle*, void* ud));
+void p3d_clear();
 
 struct p3d_emitter* p3d_emitter_create(const struct p3d_emitter_cfg* cfg);
 void p3d_emitter_release(struct p3d_emitter*);
