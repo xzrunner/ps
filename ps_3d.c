@@ -12,6 +12,8 @@
 
 #define PI 3.1415926
 
+//#define EMITTER_LOG
+
 static struct p3d_particle*	PARTICLE_ARRAY		= NULL;
 static struct p3d_particle*	PARTICLE_ARRAY_HEAD	= NULL;
 static struct p3d_emitter*	EMITTER_ARRAY		= NULL;
@@ -52,6 +54,10 @@ p3d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, fl
 	REMOVE_FUNC = remove_func;
 }
 
+#ifdef EMITTER_LOG
+static int et_count = 0;
+#endif // EMITTER_LOG
+
 void 
 p3d_clear() {
 	int sz = sizeof(struct p3d_particle) * MAX_PARTICLE_SZ;
@@ -63,9 +69,11 @@ p3d_clear() {
 	memset(EMITTER_ARRAY_HEAD, 0, sz);
 	PS_ARRAY_INIT(EMITTER_ARRAY_HEAD, MAX_EMITTER_SZ);
     EMITTER_ARRAY = EMITTER_ARRAY_HEAD;
-}
 
-static int et_count = 0;
+#ifdef EMITTER_LOG
+	et_count = 0;
+#endif // EMITTER_LOG
+}
 
 struct p3d_emitter* 
 p3d_emitter_create(const struct p3d_emitter_cfg* cfg) {
@@ -74,8 +82,10 @@ p3d_emitter_create(const struct p3d_emitter_cfg* cfg) {
 	if (!et) {
 		return NULL;
 	}
+#ifdef EMITTER_LOG
 	++et_count;
 	printf("++ add %d %p \n", et_count, et);
+#endif // EMITTER_LOG
 	memset(et, 0, sizeof(struct p3d_emitter));
 	et->loop = true;
 	et->cfg = cfg;
@@ -84,8 +94,10 @@ p3d_emitter_create(const struct p3d_emitter_cfg* cfg) {
 
 void 
 p3d_emitter_release(struct p3d_emitter* et) {
+#ifdef EMITTER_LOG
 	--et_count;
 	printf("-- del %d %p\n", et_count, et);
+#endif // EMITTER_LOG
 
 	p3d_emitter_clear(et);
 	PS_ARRAY_FREE(EMITTER_ARRAY, et);
