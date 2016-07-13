@@ -9,10 +9,15 @@
 
 #define MAX_SPRITE_SZ	1000
 
+//#define SPR_LOG
+
 static struct p3d_sprite* SPRITE_ARRAY = NULL;
 
 static void (*CREATE_DRAW_PARAMS_FUNC)(struct p3d_sprite*);
 static void (*RELEASE_DRAW_PARAMS_FUNC)(struct p3d_sprite*);
+
+static struct p3d_sprite* CREATED_BUF[MAX_SPRITE_SZ];
+static int CREATED_COUNT = 0;
 
 void 
 p3d_sprite_init(void (*create_draw_params_func)(struct p3d_sprite* spr),
@@ -30,7 +35,9 @@ p3d_sprite_init(void (*create_draw_params_func)(struct p3d_sprite* spr),
 	PS_ARRAY_INIT(SPRITE_ARRAY, MAX_SPRITE_SZ);
 }
 
-//static int count = 0;
+#ifdef SPR_LOG
+static int count = 0;
+#endif // SPR_LOG
 
 struct p3d_sprite* 
 p3d_sprite_create() {
@@ -39,9 +46,14 @@ p3d_sprite_create() {
 	if (!spr) {
 		return NULL;
 	}
-	//++count;
-	//printf("add %d %p\n", count, spr);
+#ifdef SPR_LOG
+	++count;
+	printf("add %d %p\n", count, spr);
+#endif // EMITTER_LOG
 	memset(spr, 0, sizeof(struct p3d_sprite));
+	if (CREATED_COUNT < MAX_SPRITE_SZ) {
+		CREATED_BUF[CREATED_COUNT++] = spr;
+	}
 	return spr;
 }
 
@@ -54,11 +66,24 @@ p3d_sprite_release(struct p3d_sprite* spr) {
 	if (spr->draw_params) {
 		RELEASE_DRAW_PARAMS_FUNC(spr);
 	}
-	//--count;
-	//printf("del %d %p\n", count, spr);
+#ifdef SPR_LOG
+	--count;
+	printf("del %d %p\n", count, spr);
+#endif // EMITTER_LOG
 
 	*(spr->ptr_self) = NULL;
 	PS_ARRAY_FREE(SPRITE_ARRAY, spr);
+}
+
+void 
+p3d_sprite_clear() {
+	for (int i = 0; i < CREATED_COUNT; ++i) {
+		struct p3d_sprite* spr = CREATED_BUF[i];
+		if (spr->et) {
+			p3d_sprite_release(spr);
+		}
+	}
+	CREATED_COUNT = 0;
 }
 
 void 

@@ -28,6 +28,8 @@ void p3d_sprite_init(void (*create_draw_params_func)(struct p3d_sprite*),
 struct p3d_sprite* p3d_sprite_create();
 void p3d_sprite_release(struct p3d_sprite*);
 
+void p3d_sprite_clear();
+
 void p3d_sprite_create_draw_params(struct p3d_sprite*);
 
 #endif // particle_system_3d_sprite_h

@@ -53,6 +53,8 @@ lp3d_resume(lua_State* L) {
 
 static int
 lp3d_clear(lua_State* L) {
+	p3d_buffer_clear();
+	p3d_sprite_clear();
 	p3d_clear();
 	return 0;
 }
