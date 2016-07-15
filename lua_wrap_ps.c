@@ -63,6 +63,9 @@ static void inline
 _emitter_release(struct sprite* spr, void* ud) {
 	assert(spr->type == TYPE_P3D_SPR);
 	struct p3d_sprite* p3d = spr->data_ext.p3d;
+	if (!p3d) {
+		return;
+	}
 	// already release from buffer
 	if (p3d->et) {
 		p3d_buffer_remove(p3d);
@@ -82,7 +85,9 @@ lp3d_emitter_release(lua_State* L) {
 static void inline
 _emitter_clear_time(struct sprite* spr, void* ud) {
 	assert(spr->type == TYPE_P3D_SPR);
-	spr->data_ext.p3d->et->time = 0;
+	if (spr->data_ext.p3d && spr->data_ext.p3d->et){
+		spr->data_ext.p3d->et->time = 0;
+	}
 }
 
 static int
@@ -96,9 +101,11 @@ lp3d_emitter_clear_time(lua_State* L) {
 static void inline
 _emitter_update(struct sprite* spr, void* ud) {
 	assert(spr->type == TYPE_P3D_SPR);
-	float dt = *(float*)ud;
-	p3d_emitter_update(spr->data_ext.p3d->et, dt, NULL);
-	spr->data_ext.p3d->et->time += dt;
+	if (spr->data_ext.p3d && spr->data_ext.p3d->et) {
+		float dt = *(float*)ud;
+		p3d_emitter_update(spr->data_ext.p3d->et, dt, NULL);
+		spr->data_ext.p3d->et->time += dt;
+	}
 }
 
 static int
@@ -114,7 +121,9 @@ static void inline
 _emitter_set_loop(struct sprite* spr, void* ud) {
 	assert(spr->type == TYPE_P3D_SPR);
 	bool loop = *(bool*)ud;
-	spr->data_ext.p3d->et->loop = loop;
+	if (spr->data_ext.p3d && spr->data_ext.p3d->et) {
+		spr->data_ext.p3d->et->loop = loop;
+	}
 }
 
 static int
@@ -129,8 +138,12 @@ lp3d_emitter_set_loop(lua_State* L) {
 static void inline
 _emitter_is_finished(struct sprite* spr, void* ud) {
 	assert(spr->type == TYPE_P3D_SPR);
-	bool finishded = p3d_emitter_is_finished(spr->data_ext.p3d->et);
-	if (!finishded) {
+	if (spr->data_ext.p3d && spr->data_ext.p3d->et) {
+		bool finishded = p3d_emitter_is_finished(spr->data_ext.p3d->et);
+		if (!finishded) {
+			*(bool*)ud = false;
+		}
+	} else {
 		*(bool*)ud = false;
 	}
 }
@@ -165,7 +178,7 @@ static void inline
 _sprite_set_alone(struct sprite* spr, void* ud) {
 	assert(spr->type == TYPE_P3D_SPR);
 	bool alone = *(bool*)ud;
-	if (alone == spr->s.p3d_spr->alone) {
+	if (alone == spr->s.p3d_spr->alone || !spr->data_ext.p3d) {
 		return;
 	}
 	if (alone) {
