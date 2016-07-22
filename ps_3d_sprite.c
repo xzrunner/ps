@@ -29,7 +29,7 @@ p3d_sprite_init(void (*create_draw_params_func)(struct p3d_sprite* spr),
 	int sz = sizeof(struct p3d_sprite) * MAX_SPRITE_SZ;
 	SPRITE_ARRAY = (struct p3d_sprite*)malloc(sz);
 	if (!SPRITE_ARRAY) {
-		LOGW("malloc err: p3d_sprite_init");
+		LOGW("%s", "malloc err: p3d_sprite_init");
 		return;
 	}
 	memset(SPRITE_ARRAY, 0, sz);

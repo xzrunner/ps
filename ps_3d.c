@@ -30,7 +30,7 @@ p3d_init() {
         int sz = sizeof(struct p3d_particle) * MAX_PARTICLE_SZ;
         PARTICLE_ARRAY_HEAD = (struct p3d_particle*)malloc(sz);
         if (!PARTICLE_ARRAY_HEAD) {
-            LOGW("malloc err: p3d_init particle");
+            LOGW("%s", "malloc err: p3d_init particle");
             return;
         }
     }
@@ -38,7 +38,7 @@ p3d_init() {
         int sz = sizeof(struct p3d_emitter) * MAX_EMITTER_SZ;
         EMITTER_ARRAY_HEAD = (struct p3d_emitter*)malloc(sz);
         if (!EMITTER_ARRAY_HEAD) {
-            LOGW("malloc err: p3d_init emitter");
+            LOGW("%s", "malloc err: p3d_init emitter");
             return;
         }
     }
