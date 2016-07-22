@@ -2,7 +2,8 @@
 #include "ps_3d.h"
 #include "ps_array.h"
 
-#include <stdio.h>
+#include <logger.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -28,7 +29,7 @@ p3d_sprite_init(void (*create_draw_params_func)(struct p3d_sprite* spr),
 	int sz = sizeof(struct p3d_sprite) * MAX_SPRITE_SZ;
 	SPRITE_ARRAY = (struct p3d_sprite*)malloc(sz);
 	if (!SPRITE_ARRAY) {
-		printf("malloc err: p3d_init !\n");
+		LOGW("malloc err: p3d_sprite_init");
 		return;
 	}
 	memset(SPRITE_ARRAY, 0, sz);
@@ -48,7 +49,7 @@ p3d_sprite_create() {
 	}
 #ifdef SPR_LOG
 	++count;
-	printf("add %d %p\n", count, spr);
+	LOGD("add %d %p\n", count, spr);
 #endif // EMITTER_LOG
 	memset(spr, 0, sizeof(struct p3d_sprite));
 	if (CREATED_COUNT < MAX_SPRITE_SZ) {
@@ -68,7 +69,7 @@ p3d_sprite_release(struct p3d_sprite* spr) {
 	}
 #ifdef SPR_LOG
 	--count;
-	printf("del %d %p\n", count, spr);
+	LOGD("del %d %p\n", count, spr);
 #endif // EMITTER_LOG
 
 	*(spr->ptr_self) = NULL;

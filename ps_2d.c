@@ -1,9 +1,10 @@
 #include "ps_2d.h"
 #include "ps_array.h"
 
+#include <logger.h>
+
 #include <math.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <assert.h>
 
@@ -11,7 +12,7 @@
 #define MAX_EMITTER_SZ	1000
 
 static struct p2d_particle* PARTICLE_ARRAY = NULL;
-static struct p2d_emitter* EMITTER_ARRAY = NULL;
+static struct p2d_emitter*	EMITTER_ARRAY = NULL;
 
 static void (*RENDER_FUNC)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud);
 
@@ -20,7 +21,7 @@ p2d_init() {
 	int sz = sizeof(struct p2d_particle) * MAX_PARTICLE_SZ;
 	PARTICLE_ARRAY = (struct p2d_particle*)malloc(sz);
 	if (!PARTICLE_ARRAY) {
-		printf("malloc err: p2d_init !\n");
+		LOGW("malloc err: p2d_init particle");
 		return;
 	}
 	memset(PARTICLE_ARRAY, 0, sz);
@@ -29,7 +30,7 @@ p2d_init() {
 	sz = sizeof(struct p2d_emitter) * MAX_EMITTER_SZ;
 	EMITTER_ARRAY = (struct p2d_emitter*)malloc(sz);
 	if (!EMITTER_ARRAY) {
-		printf("malloc err: p2d_init !\n");
+		LOGW("malloc err: p2d_init emitter");
 		return;
 	}
 	memset(EMITTER_ARRAY, 0, sz);

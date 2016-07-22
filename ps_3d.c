@@ -1,9 +1,10 @@
 #include "ps_3d.h"
 #include "ps_array.h"
 
+#include <logger.h>
+
 #include <math.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <assert.h>
 
@@ -29,7 +30,7 @@ p3d_init() {
         int sz = sizeof(struct p3d_particle) * MAX_PARTICLE_SZ;
         PARTICLE_ARRAY_HEAD = (struct p3d_particle*)malloc(sz);
         if (!PARTICLE_ARRAY_HEAD) {
-            printf("malloc err: p3d_init !\n");
+            LOGW("malloc err: p3d_init particle");
             return;
         }
     }
@@ -37,7 +38,7 @@ p3d_init() {
         int sz = sizeof(struct p3d_emitter) * MAX_EMITTER_SZ;
         EMITTER_ARRAY_HEAD = (struct p3d_emitter*)malloc(sz);
         if (!EMITTER_ARRAY_HEAD) {
-            printf("malloc err: p3d_init !\n");
+            LOGW("malloc err: p3d_init emitter");
             return;
         }
     }
@@ -84,7 +85,7 @@ p3d_emitter_create(const struct p3d_emitter_cfg* cfg) {
 	}
 #ifdef EMITTER_LOG
 	++et_count;
-	printf("++ add %d %p \n", et_count, et);
+	LOGD("++ add %d %p \n", et_count, et);
 #endif // EMITTER_LOG
 	memset(et, 0, sizeof(struct p3d_emitter));
 	et->loop = true;
@@ -96,7 +97,7 @@ void
 p3d_emitter_release(struct p3d_emitter* et) {
 #ifdef EMITTER_LOG
 	--et_count;
-	printf("-- del %d %p\n", et_count, et);
+	LOGD("-- del %d %p\n", et_count, et);
 #endif // EMITTER_LOG
 
 	p3d_emitter_clear(et);

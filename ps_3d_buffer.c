@@ -6,8 +6,6 @@
 #include <string.h>
 #include <assert.h>
 
-#include <stdio.h>
-
 struct list {
 	struct p3d_sprite *head, *tail;
 };
