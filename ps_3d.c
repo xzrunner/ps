@@ -303,12 +303,14 @@ _update_speed(struct p3d_emitter* et, float dt, struct p3d_particle* p) {
 	tan_spd.y *= p->cfg.tangential_spd;
 	p->spd.x += tan_spd.x;
 	p->spd.y += tan_spd.y;
-	
+
 	// normal acceleration
 	float velocity = ps_vec3_len(&p->spd);
-	float linear_acc = p->cfg.linear_acc * dt;
-	for (int i = 0; i < 3; ++i) {
-		p->spd.xyz[i] += linear_acc * p->spd.xyz[i] / velocity;
+	if (velocity != 0) {
+		float linear_acc = p->cfg.linear_acc * dt;
+		for (int i = 0; i < 3; ++i) {
+			p->spd.xyz[i] += linear_acc * p->spd.xyz[i] / velocity;
+		}
 	}
 
 	_update_disturbance_speed(et, dt, p);
