@@ -32,11 +32,18 @@ struct ps_vec3 {
 	};
 };
 
-struct ps_color4f {
-	float r;
-	float g;
-	float b;
-	float a;
+struct ps_color
+{
+	union {
+		struct {
+			uint8_t r;
+			uint8_t g;
+			uint8_t b;
+			uint8_t a;			
+		};
+
+		uint8_t rgba[4];
+	};
 };
 
 static inline void 
@@ -81,8 +88,8 @@ ps_vec3_projection(const struct ps_vec3* pos3, struct ps_vec2* pos2) {
 }
 
 static inline void
-ps_color_sub(const struct ps_color4f* start, const struct ps_color4f* end, 
-			 struct ps_color4f* ret) {
+ps_color_sub(const struct ps_color* start, const struct ps_color* end, 
+			 struct ps_color* ret) {
 	ret->r = end->r - start->r;
 	ret->g = end->g - start->g;
 	ret->b = end->b - start->b;
@@ -90,11 +97,11 @@ ps_color_sub(const struct ps_color4f* start, const struct ps_color4f* end,
 }
 
 static inline void
-ps_color_mul(struct ps_color4f* ori, float mul) {
-	ori->r *= mul;
-	ori->g *= mul;
-	ori->b *= mul;
-	ori->a *= mul;
+ps_color_mul(struct ps_color* ori, float mul) {
+	ori->r = (int)(ori->r * mul + 0.5f);
+	ori->g = (int)(ori->g * mul + 0.5f);
+	ori->b = (int)(ori->b * mul + 0.5f);
+	ori->a = (int)(ori->a * mul + 0.5f);
 }
 
 static inline float 

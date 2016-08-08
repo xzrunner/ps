@@ -19,8 +19,8 @@ struct p2d_symbol {
 
 	float scale_start, scale_end;
 
-	struct ps_color4f col_mul_start, col_mul_end;
-	struct ps_color4f col_add_start, col_add_end;
+	struct ps_color mul_col_start, mul_col_end;
+	struct ps_color add_col_start, add_col_end;
 
 	void* ud;
 };
@@ -40,8 +40,8 @@ struct p2d_particle {
 
 	float angle, angle_delta;
 	float scale, scale_delta;
-	struct ps_color4f col_mul, col_mul_delta;
-	struct ps_color4f col_add, col_add_delta;
+	struct ps_color mul_col, mul_col_delta;
+	struct ps_color add_col, add_col_delta;
 
 	union {
 		struct {
@@ -137,7 +137,7 @@ struct p2d_emitter {
 };
 
 void p2d_init();
-void p2d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud));
+void p2d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud));
 
 struct p2d_emitter* p2d_emitter_create(struct p2d_emitter_cfg* cfg);
 void p2d_emitter_release(struct p2d_emitter* et);

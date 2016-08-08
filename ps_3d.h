@@ -20,8 +20,8 @@ struct p3d_symbol {
 
 	float angle, angle_var;
 
-	struct ps_color4f col_mul, col_add;
-	float alpha_start, alpha_end;
+	struct ps_color mul_col_begin, mul_col_end;
+	struct ps_color add_col_begin, add_col_end;
 
 	struct p3d_emitter_cfg* bind_ps_cfg;
 
@@ -50,7 +50,7 @@ struct p3d_particle_cfg {
 
 	int _dummy;		// unused: dummy for align to 64bit
 
-	struct p3d_symbol* symbol;
+	struct p3d_symbol* sym;
 };
 
 #define SIZEOF_P3D_PARTICLE_CFG (sizeof(struct p3d_particle_cfg) + PTR_SIZE_DIFF)
@@ -153,7 +153,7 @@ struct p3d_emitter {
 };
 
 void p3d_init();
-void p3d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud),
+void p3d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud),
 				   void (*add_func)(struct p3d_particle*, void* ud),
 				   void (*remove_func)(struct p3d_particle*, void* ud));
 void p3d_clear();

@@ -20,7 +20,7 @@ static struct p3d_particle*	PARTICLE_ARRAY_HEAD	= NULL;
 static struct p3d_emitter*	EMITTER_ARRAY		= NULL;
 static struct p3d_emitter*	EMITTER_ARRAY_HEAD	= NULL;
 
-static void (*RENDER_FUNC)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud);
+static void (*RENDER_FUNC)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud);
 static void (*ADD_FUNC)(struct p3d_particle*, void* ud);
 static void (*REMOVE_FUNC)(struct p3d_particle*, void* ud);
 
@@ -47,7 +47,7 @@ p3d_init() {
 }
 
 void 
-p3d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color4f* mul_col, struct ps_color4f* add_col, const void* ud),
+p3d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud),
 			  void (*add_func)(struct p3d_particle*, void* ud),
 			  void (*remove_func)(struct p3d_particle*, void* ud)) {
 	RENDER_FUNC = render_func;
@@ -163,9 +163,9 @@ _init_particle(struct p3d_emitter* et, struct p3d_particle* p, struct p3d_symbol
 	uint32_t RANDSEED = rand();
 
 	if (symbol) {
-		p->cfg.symbol = symbol;
+		p->cfg.sym = symbol;
 	} else {
-		p->cfg.symbol = (struct p3d_symbol*)(et->cfg->symbols + RANDSEED % et->cfg->symbol_count);
+		p->cfg.sym = (struct p3d_symbol*)(et->cfg->symbols + RANDSEED % et->cfg->symbol_count);
 	}
 
 	p->life = et->cfg->life + et->cfg->life_var * ps_random_m11(&RANDSEED);
@@ -193,7 +193,7 @@ _init_particle(struct p3d_emitter* et, struct p3d_particle* p, struct p3d_symbol
 
 	p->cfg.angular_spd = et->cfg->angular_spd + et->cfg->angular_spd_var * ps_random_m11(&RANDSEED);
 
-	p->angle = p->cfg.symbol->angle + p->cfg.symbol->angle_var * ps_random_m11(&RANDSEED);
+	p->angle = p->cfg.sym->angle + p->cfg.sym->angle_var * ps_random_m11(&RANDSEED);
 
 // 	// todo bind_ps
 // 	if (p->cfg.symbol->bind_ps_cfg) {
@@ -435,10 +435,18 @@ p3d_emitter_update(struct p3d_emitter* et, float dt, float* mat) {
 	}
 }
 
+static inline void
+_color_lerp(struct ps_color* begin, struct ps_color* end, struct ps_color* lerp, float proc) {
+	lerp->r = proc * (end->r - begin->r) + begin->r;
+	lerp->g = proc * (end->g - begin->g) + begin->g;
+	lerp->b = proc * (end->b - begin->b) + begin->b;
+	lerp->a = proc * (end->a - begin->a) + begin->a;
+}
+
 void 
 p3d_emitter_draw(struct p3d_emitter* et, const void* ud) {
 	struct ps_vec2 pos;
-	struct ps_color4f mul_col;
+	struct ps_color mul_col, add_col;
 
 	struct p3d_particle* p = et->head;
 	while (p) {
@@ -446,16 +454,15 @@ p3d_emitter_draw(struct p3d_emitter* et, const void* ud) {
 
 		ps_vec3_projection(&p->pos, &pos);
 
-		float scale = proc * (p->cfg.symbol->scale_end - p->cfg.symbol->scale_start) + p->cfg.symbol->scale_start;
+		float scale = proc * (p->cfg.sym->scale_end - p->cfg.sym->scale_start) + p->cfg.sym->scale_start;
 
-		mul_col = p->cfg.symbol->col_mul;
+		_color_lerp(&p->cfg.sym->mul_col_begin, &p->cfg.sym->mul_col_end, &mul_col, proc);
+		_color_lerp(&p->cfg.sym->add_col_begin, &p->cfg.sym->add_col_end, &add_col, proc);
 		if (p->life < et->cfg->fadeout_time) {
 			mul_col.a *= p->life / et->cfg->fadeout_time;
 		}
-		float alpha = proc * (p->cfg.symbol->alpha_end - p->cfg.symbol->alpha_start) + p->cfg.symbol->alpha_start;
-		mul_col.a *= alpha;
 
-		RENDER_FUNC(p->cfg.symbol->ud, p->mat, pos.x, pos.y, p->angle, scale, &mul_col, &p->cfg.symbol->col_add, ud);
+		RENDER_FUNC(p->cfg.sym->ud, p->mat, pos.x, pos.y, p->angle, scale, &mul_col, &add_col, ud);
 
 		p = p->next;
 	}
