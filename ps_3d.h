@@ -87,8 +87,10 @@ enum GROUND_TYPE {
 };
 
 struct p3d_emitter_cfg {
+	int blend;
+
 	bool static_mode;
-	char _pad[7];		// unused: dummy for align to 64bit
+	char _pad[3];		// unused: dummy for align to 64bit
 
 	float emission_time;
 	int count;
@@ -121,8 +123,6 @@ struct p3d_emitter_cfg {
 
 	struct ps_vec3 dir;
 
-	// todo: additive_blend, inertia
-
 	int symbol_count;
 	struct p3d_symbol* symbols;
 };
@@ -153,7 +153,8 @@ struct p3d_emitter {
 };
 
 void p3d_init();
-void p3d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud),
+void p3d_regist_cb(void (*blend_func)(int blend),
+				   void (*render_func)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud),
 				   void (*add_func)(struct p3d_particle*, void* ud),
 				   void (*remove_func)(struct p3d_particle*, void* ud));
 void p3d_clear();
