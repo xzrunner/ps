@@ -48,8 +48,6 @@ struct p3d_particle_cfg {
 	float dis_spd;
 	float dis_region;
 
-	int _dummy;		// unused: dummy for align to 64bit
-
 	struct p3d_symbol* sym;
 };
 
