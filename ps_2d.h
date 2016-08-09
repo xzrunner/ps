@@ -19,8 +19,8 @@ struct p2d_symbol {
 
 	float scale_start, scale_end;
 
-	struct ps_color mul_col_start, mul_col_end;
-	struct ps_color add_col_start, add_col_end;
+	struct ps_color mul_col_begin, mul_col_end;
+	struct ps_color add_col_begin, add_col_end;
 
 	void* ud;
 };

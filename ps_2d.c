@@ -159,12 +159,12 @@ _init_particle(struct p2d_emitter* et, struct p2d_particle* p) {
 	p->scale = p->symbol->scale_start;
 	p->scale_delta = (p->symbol->scale_end - p->symbol->scale_start) * k;
 
-	p->mul_col = p->symbol->mul_col_start;
-	ps_color_sub(&p->symbol->mul_col_end, &p->symbol->mul_col_start, &p->mul_col_delta);
+	p->mul_col = p->symbol->mul_col_begin;
+	ps_color_sub(&p->symbol->mul_col_end, &p->symbol->mul_col_begin, &p->mul_col_delta);
 	ps_color_mul(&p->mul_col_delta, k);
 
-	p->add_col = p->symbol->add_col_start;
-	ps_color_sub(&p->symbol->add_col_end, &p->symbol->add_col_start, &p->add_col_delta);
+	p->add_col = p->symbol->add_col_begin;
+	ps_color_sub(&p->symbol->add_col_end, &p->symbol->add_col_begin, &p->add_col_delta);
 	ps_color_mul(&p->add_col_delta, k);
 
 	if (et->cfg->mode_type == P2D_MODE_GRAVITY) {
