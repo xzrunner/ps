@@ -14,7 +14,7 @@
 static struct p2d_particle* PARTICLE_ARRAY = NULL;
 static struct p2d_emitter*	EMITTER_ARRAY = NULL;
 
-static void (*RENDER_FUNC)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud);
+static void (*RENDER_FUNC)(void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud);
 
 void 
 p2d_init() {
@@ -38,7 +38,7 @@ p2d_init() {
 }
 
 void 
-p2d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud)) {
+p2d_regist_cb(void (*render_func)(void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud)) {
 	RENDER_FUNC = render_func;	
 }
 
@@ -143,7 +143,7 @@ static inline void
 _init_particle(struct p2d_emitter* et, struct p2d_particle* p) {
 	uint32_t RANDSEED = rand();
 
-	p->symbol = (struct p2d_symbol*)(et->cfg->symbols + RANDSEED % et->cfg->symbol_count);
+	p->sym = (struct p2d_symbol*)(et->cfg->syms + RANDSEED % et->cfg->sym_count);
 
 	p->life = et->cfg->life + et->cfg->life_var * ps_random_m11(&RANDSEED);
 
@@ -153,18 +153,18 @@ _init_particle(struct p2d_emitter* et, struct p2d_particle* p) {
 
 	float k = 1 / p->life;
 
-	p->angle = p->symbol->angle_start;
-	p->angle_delta = (p->symbol->angle_end - p->symbol->angle_start) * k;
+	p->angle = p->sym->angle_start;
+	p->angle_delta = (p->sym->angle_end - p->sym->angle_start) * k;
 
-	p->scale = p->symbol->scale_start;
-	p->scale_delta = (p->symbol->scale_end - p->symbol->scale_start) * k;
+	p->scale = p->sym->scale_start;
+	p->scale_delta = (p->sym->scale_end - p->sym->scale_start) * k;
 
-	p->mul_col = p->symbol->mul_col_begin;
-	ps_color_sub(&p->symbol->mul_col_end, &p->symbol->mul_col_begin, &p->mul_col_delta);
+	p->mul_col = p->sym->mul_col_begin;
+	ps_color_sub(&p->sym->mul_col_end, &p->sym->mul_col_begin, &p->mul_col_delta);
 	ps_color_mul(&p->mul_col_delta, k);
 
-	p->add_col = p->symbol->add_col_begin;
-	ps_color_sub(&p->symbol->add_col_end, &p->symbol->add_col_begin, &p->add_col_delta);
+	p->add_col = p->sym->add_col_begin;
+	ps_color_sub(&p->sym->add_col_end, &p->sym->add_col_begin, &p->add_col_delta);
 	ps_color_mul(&p->add_col_delta, k);
 
 	if (et->cfg->mode_type == P2D_MODE_GRAVITY) {
@@ -178,7 +178,7 @@ _init_particle(struct p2d_emitter* et, struct p2d_particle* p) {
 
 static inline void
 _add_particle_random(struct p2d_emitter* et, float* mat) {
-	if (!et->cfg->symbol_count) {
+	if (!et->cfg->sym_count) {
 		return;
 	}
 
@@ -318,7 +318,7 @@ void
 p2d_emitter_draw(struct p2d_emitter* et, const void* ud) {
 	struct p2d_particle* p = et->head;
 	while (p) {
-		RENDER_FUNC(p->symbol->ud, p->mat, p->position.x, p->position.y, p->angle, p->scale, &p->mul_col, &p->add_col, ud);
+		RENDER_FUNC(p->sym->ud, p->mat, p->position.x, p->position.y, p->angle, p->scale, &p->mul_col, &p->add_col, ud);
 		p = p->next;
 	}
 }

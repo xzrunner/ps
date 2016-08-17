@@ -21,7 +21,7 @@ static struct p3d_emitter*	EMITTER_ARRAY		= NULL;
 static struct p3d_emitter*	EMITTER_ARRAY_HEAD	= NULL;
 
 static void (*BLEND_FUNC)(int blend);
-static void (*RENDER_FUNC)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud);
+static void (*RENDER_FUNC)(void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud);
 static void (*ADD_FUNC)(struct p3d_particle*, void* ud);
 static void (*REMOVE_FUNC)(struct p3d_particle*, void* ud);
 
@@ -49,7 +49,7 @@ p3d_init() {
 
 void 
 p3d_regist_cb(void (*blend_func)(int blend),
-			  void (*render_func)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud),
+			  void (*render_func)(void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud),
 			  void (*add_func)(struct p3d_particle*, void* ud),
 			  void (*remove_func)(struct p3d_particle*, void* ud)) {
 	BLEND_FUNC = blend_func;
@@ -162,13 +162,13 @@ _trans_coords2d(float r, float h, float hori, struct ps_vec3* pos) {
 }
 
 static inline void
-_init_particle(struct p3d_emitter* et, struct p3d_particle* p, struct p3d_symbol* symbol) {
+_init_particle(struct p3d_emitter* et, struct p3d_particle* p, struct p3d_symbol* sym) {
 	uint32_t RANDSEED = rand();
 
-	if (symbol) {
-		p->cfg.sym = symbol;
+	if (sym) {
+		p->cfg.sym = sym;
 	} else {
-		p->cfg.sym = (struct p3d_symbol*)(et->cfg->symbols + RANDSEED % et->cfg->symbol_count);
+		p->cfg.sym = (struct p3d_symbol*)(et->cfg->syms + RANDSEED % et->cfg->sym_count);
 	}
 
 	p->life = et->cfg->life + et->cfg->life_var * ps_random_m11(&RANDSEED);
@@ -199,9 +199,9 @@ _init_particle(struct p3d_emitter* et, struct p3d_particle* p, struct p3d_symbol
 	p->angle = p->cfg.sym->angle + p->cfg.sym->angle_var * ps_random_m11(&RANDSEED);
 
 // 	// todo bind_ps
-// 	if (p->cfg.symbol->bind_ps_cfg) {
+// 	if (p->cfg.sym->bind_ps_cfg) {
 // 		int num = et->end - et->start;
-// 		p->bind_ps = p3d_create(num, p->cfg.symbol->bind_ps_cfg);
+// 		p->bind_ps = p3d_create(num, p->cfg.sym->bind_ps_cfg);
 // 	} else if (p->bind_ps) {
 // 		free(p->bind_ps);
 // 		p->bind_ps = NULL;
@@ -237,8 +237,8 @@ _add_particle(struct p3d_emitter* et, float* mat, struct p3d_symbol* sym) {
 
 static void
 _add_particle_static(struct p3d_emitter* et, float* mat) {
-	for (int i = 0; i < et->cfg->symbol_count; ++i) {
-		struct p3d_symbol* sym = &et->cfg->symbols[i];
+	for (int i = 0; i < et->cfg->sym_count; ++i) {
+		struct p3d_symbol* sym = &et->cfg->syms[i];
 		for (int j = 0; j < sym->count; ++j) {
 			_add_particle(et, mat, sym);
 		}
@@ -247,7 +247,7 @@ _add_particle_static(struct p3d_emitter* et, float* mat) {
 
 static inline void
 _add_particle_random(struct p3d_emitter* et, float* mat) {
-	if (!et->cfg->symbol_count) {
+	if (!et->cfg->sym_count) {
 		return;
 	}
 

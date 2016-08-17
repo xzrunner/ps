@@ -28,7 +28,7 @@ struct p2d_symbol {
 #define SIZEOF_P2D_SYMBOL (sizeof(struct p2d_symbol) + PTR_SIZE_DIFF)
 
 struct p2d_particle {
-	struct p2d_symbol* symbol;
+	struct p2d_symbol* sym;
 
 	float mat[6];
 
@@ -112,8 +112,8 @@ struct p2d_emitter_cfg {
 
 	float direction, direction_var;
 
-	int symbol_count;
-	struct p2d_symbol* symbols;
+	int sym_count;
+	struct p2d_symbol* syms;
 };
 
 #define SIZEOF_P2D_EMITTER_CFG (sizeof(struct p2d_emitter_cfg) + PTR_SIZE_DIFF)
@@ -137,7 +137,7 @@ struct p2d_emitter {
 };
 
 void p2d_init();
-void p2d_regist_cb(void (*render_func)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud));
+void p2d_regist_cb(void (*render_func)(void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud));
 
 struct p2d_emitter* p2d_emitter_create(struct p2d_emitter_cfg* cfg);
 void p2d_emitter_release(struct p2d_emitter* et);

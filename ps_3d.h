@@ -121,8 +121,8 @@ struct p3d_emitter_cfg {
 
 	struct ps_vec3 dir;
 
-	int symbol_count;
-	struct p3d_symbol* symbols;
+	int sym_count;
+	struct p3d_symbol* syms;
 };
 
 #define SIZEOF_P3D_EMITTER_CFG (sizeof(struct p3d_emitter_cfg) + PTR_SIZE_DIFF)
@@ -152,7 +152,7 @@ struct p3d_emitter {
 
 void p3d_init();
 void p3d_regist_cb(void (*blend_func)(int blend),
-				   void (*render_func)(void* symbol, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud),
+				   void (*render_func)(void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud),
 				   void (*add_func)(struct p3d_particle*, void* ud),
 				   void (*remove_func)(struct p3d_particle*, void* ud));
 void p3d_clear();
