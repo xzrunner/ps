@@ -151,7 +151,8 @@ struct p3d_emitter {
 };
 
 void p3d_init();
-void p3d_regist_cb(void (*blend_func)(int blend),
+void p3d_regist_cb(void (*blend_begin_func)(int blend),
+				   void (*blend_end_func)(),
 				   void (*render_func)(void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud),
 				   void (*add_func)(struct p3d_particle*, void* ud),
 				   void (*remove_func)(struct p3d_particle*, void* ud));
