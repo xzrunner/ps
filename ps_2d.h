@@ -131,7 +131,7 @@ struct p2d_emitter {
 
 	float time;
 
-	struct p2d_emitter_cfg* cfg;
+	const struct p2d_emitter_cfg* cfg;
 
 	struct p2d_emitter* next;
 };
@@ -139,7 +139,7 @@ struct p2d_emitter {
 void p2d_init();
 void p2d_regist_cb(void (*render_func)(void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud));
 
-struct p2d_emitter* p2d_emitter_create(struct p2d_emitter_cfg* cfg);
+struct p2d_emitter* p2d_emitter_create(const struct p2d_emitter_cfg* cfg);
 void p2d_emitter_release(struct p2d_emitter* et);
 void p2d_emitter_clear(struct p2d_emitter* et);
 

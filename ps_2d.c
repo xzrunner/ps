@@ -43,7 +43,7 @@ p2d_regist_cb(void (*render_func)(void* sym, float* mat, float x, float y, float
 }
 
 struct p2d_emitter* 
-p2d_emitter_create(struct p2d_emitter_cfg* cfg) {
+p2d_emitter_create(const struct p2d_emitter_cfg* cfg) {
 	struct p2d_emitter* et;
 	PS_ARRAY_ALLOC(EMITTER_ARRAY, et);
 	if (!et) {
