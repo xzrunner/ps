@@ -219,8 +219,12 @@ _add_particle(struct p3d_emitter* et, float* mat, struct p3d_symbol* sym) {
 		return;
 	}
 
-	assert(mat);
-	memcpy(p->mat, mat, sizeof(p->mat));
+	if (mat) {
+		memcpy(p->mat, mat, sizeof(p->mat));
+	} else {
+		memset(p->mat, 0, sizeof(p->mat));
+		p->mat[0] = p->mat[3] = 1024;
+	}
 	_init_particle(et, p, sym);
 
 	if (ADD_FUNC) {
