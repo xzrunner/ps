@@ -9,7 +9,7 @@
 #include <assert.h>
 
 #define MAX_PARTICLE_SZ 10000
-#define MAX_EMITTER_SZ	1000
+#define MAX_EMITTER_SZ	2048
 
 #define PI 3.1415926
 
