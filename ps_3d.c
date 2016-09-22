@@ -319,7 +319,13 @@ _update_speed(struct p3d_emitter* et, float dt, struct p3d_particle* p) {
 	if (velocity != 0) {
 		float linear_acc = p->cfg.linear_acc * dt;
 		for (int i = 0; i < 3; ++i) {
-			p->spd.xyz[i] += linear_acc * p->spd.xyz[i] / velocity;
+			float v = p->spd.xyz[i];
+			float dv = linear_acc * p->spd.xyz[i] / velocity;
+			if (dv * v < 0 && fabs(dv) > fabs(v)) {
+				p->spd.xyz[i] = 0;
+			} else {
+				p->spd.xyz[i] += dv;
+			}
 		}
 	}
 
