@@ -23,7 +23,7 @@ struct p3d_symbol {
 	struct ps_color mul_col_begin, mul_col_end;
 	struct ps_color add_col_begin, add_col_end;
 
-	struct p3d_emitter_cfg* bind_ps_cfg;
+	void* dummy;	// todo: adapt old data
 
 	void* ud;
 };
@@ -71,7 +71,7 @@ struct p3d_particle {
 
 	float angle;
 
-	struct p3d_emitter* bind_ps;
+	void* ud;
 
 	struct p3d_particle* next;
 };
@@ -153,7 +153,8 @@ struct p3d_emitter {
 void p3d_init();
 void p3d_regist_cb(void (*blend_begin_func)(int blend),
 				   void (*blend_end_func)(),
-				   void (*render_func)(void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud, float time),
+				   void (*render_func)(void* spr, void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud, float time),
+				   void (*update_func)(void* spr, float x, float y),
 				   void (*add_func)(struct p3d_particle*, void* ud),
 				   void (*remove_func)(struct p3d_particle*, void* ud));
 void p3d_clear();

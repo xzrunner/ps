@@ -22,7 +22,8 @@ static struct p3d_emitter*	EMITTER_ARRAY_HEAD	= NULL;
 
 static void (*BLEND_BEGIN_FUNC)(int blend);
 static void (*BLEND_END_FUNC)();
-static void (*RENDER_FUNC)(void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud, float time);
+static void (*RENDER_FUNC)(void* spr, void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud, float time);
+static void (*UPDATE_FUNC)(void* spr, float x, float y);
 static void (*ADD_FUNC)(struct p3d_particle*, void* ud);
 static void (*REMOVE_FUNC)(struct p3d_particle*, void* ud);
 
@@ -51,14 +52,16 @@ p3d_init() {
 void 
 p3d_regist_cb(void (*blend_begin_func)(int blend),
 			  void (*blend_end_func)(),
-			  void (*render_func)(void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud, float time),
+			  void (*render_func)(void* spr, void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud, float time),
+			  void (*update_func)(void* spr, float x, float y),
 			  void (*add_func)(struct p3d_particle*, void* ud),
 			  void (*remove_func)(struct p3d_particle*, void* ud)) {
-	BLEND_BEGIN_FUNC = blend_begin_func;
-	BLEND_END_FUNC = blend_end_func;
-	RENDER_FUNC = render_func;
-	ADD_FUNC = add_func;
-	REMOVE_FUNC = remove_func;
+	BLEND_BEGIN_FUNC	= blend_begin_func;
+	BLEND_END_FUNC		= blend_end_func;
+	RENDER_FUNC			= render_func;
+	UPDATE_FUNC			= update_func;
+	ADD_FUNC			= add_func;
+	REMOVE_FUNC			= remove_func;
 }
 
 #ifdef EMITTER_LOG
@@ -116,6 +119,9 @@ p3d_emitter_clear(struct p3d_emitter* et) {
 	while (p) {
 		struct p3d_particle* next = p->next;
 		PS_ARRAY_FREE(PARTICLE_ARRAY, p);
+		if (REMOVE_FUNC) {
+			REMOVE_FUNC(p, et->ud);
+		}
 		p = next;
 	}
 
@@ -200,15 +206,6 @@ _init_particle(struct p3d_emitter* et, struct p3d_particle* p, struct p3d_symbol
 	p->cfg.angular_spd = et->cfg->angular_spd + et->cfg->angular_spd_var * ps_random_m11(&RANDSEED);
 
 	p->angle = p->cfg.sym->angle + p->cfg.sym->angle_var * ps_random_m11(&RANDSEED);
-
-// 	// todo bind_ps
-// 	if (p->cfg.sym->bind_ps_cfg) {
-// 		int num = et->end - et->start;
-// 		p->bind_ps = p3d_create(num, p->cfg.sym->bind_ps_cfg);
-// 	} else if (p->bind_ps) {
-// 		free(p->bind_ps);
-// 		p->bind_ps = NULL;
-// 	}
 }
 
 static void
@@ -227,6 +224,7 @@ _add_particle(struct p3d_emitter* et, float* mat, struct p3d_symbol* sym) {
 	}
 	_init_particle(et, p, sym);
 
+	p->ud = NULL;
 	if (ADD_FUNC) {
 		ADD_FUNC(p, et->ud);
 	}
@@ -423,8 +421,10 @@ p3d_emitter_update(struct p3d_emitter* et, float dt, float* mat) {
 	while (curr) {
 		et->tail = curr;
 
-		if (curr->bind_ps) {
-			p3d_emitter_update(curr->bind_ps, dt, mat);
+		if (curr->ud) {
+			struct ps_vec2 pos;
+			ps_vec3_projection(&curr->pos, &pos);
+			UPDATE_FUNC(curr->ud, pos.x + mat[4], pos.y + mat[5]);
 		}
 
 		curr->life -= dt;
@@ -480,7 +480,7 @@ p3d_emitter_draw(struct p3d_emitter* et, const void* ud) {
 			mul_col.a *= p->life / et->cfg->fadeout_time;
 		}
 
-		RENDER_FUNC(p->cfg.sym->ud, p->mat, pos.x, pos.y, p->angle, scale, &mul_col, &add_col, ud, p->cfg.lifetime - p->life);
+		RENDER_FUNC(p->ud, p->cfg.sym->ud, p->mat, pos.x, pos.y, p->angle, scale, &mul_col, &add_col, ud, p->cfg.lifetime - p->life);
 
 		p = p->next;
 	}
