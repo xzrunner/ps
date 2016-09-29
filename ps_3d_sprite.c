@@ -8,7 +8,7 @@
 #include <string.h>
 #include <assert.h>
 
-#define MAX_SPRITE_SZ	1000
+#define MAX_SPRITE_SZ	2000
 
 //#define SPR_LOG
 
@@ -49,7 +49,7 @@ p3d_sprite_create() {
 	}
 #ifdef SPR_LOG
 	++count;
-	LOGD("add %d %p\n", count, spr);
+	LOGD("-- add spr %d %p\n", count, spr);
 #endif // EMITTER_LOG
 	memset(spr, 0, sizeof(struct p3d_sprite));
 	if (CREATED_COUNT < MAX_SPRITE_SZ) {
@@ -69,7 +69,7 @@ p3d_sprite_release(struct p3d_sprite* spr) {
 	}
 #ifdef SPR_LOG
 	--count;
-	LOGD("del %d %p\n", count, spr);
+	LOGD("-- del spr %d %p\n", count, spr);
 #endif // EMITTER_LOG
 
 	*(spr->ptr_self) = NULL;

@@ -9,7 +9,7 @@
 #include <assert.h>
 
 #define MAX_PARTICLE_SZ 10000
-#define MAX_EMITTER_SZ	2048
+#define MAX_EMITTER_SZ	2000
 
 #define PI 3.1415926
 
@@ -94,7 +94,7 @@ p3d_emitter_create(const struct p3d_emitter_cfg* cfg) {
 	}
 #ifdef EMITTER_LOG
 	++et_count;
-	LOGD("++ add %d %p \n", et_count, et);
+	LOGD("++ add et %d %p \n", et_count, et);
 #endif // EMITTER_LOG
 	memset(et, 0, sizeof(struct p3d_emitter));
 	et->loop = true;
@@ -106,7 +106,7 @@ void
 p3d_emitter_release(struct p3d_emitter* et) {
 #ifdef EMITTER_LOG
 	--et_count;
-	LOGD("-- del %d %p\n", et_count, et);
+	LOGD("-- del et %d %p\n", et_count, et);
 #endif // EMITTER_LOG
 
 	p3d_emitter_clear(et);
@@ -490,5 +490,9 @@ p3d_emitter_draw(struct p3d_emitter* et, const void* ud) {
 
 bool 
 p3d_emitter_is_finished(struct p3d_emitter* et) {
-	return !et->loop && et->particle_count >= et->cfg->count && !et->head;
+	if (et->cfg->static_mode) {
+		return !et->loop && et->static_mode_finished && !et->head;
+	} else {
+		return !et->loop && et->particle_count >= et->cfg->count && !et->head;
+	}
 }
