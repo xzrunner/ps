@@ -159,8 +159,6 @@ _emitter_is_finished(struct sprite* spr, void* ud) {
 		if (!finishded) {
 			*(bool*)ud = false;
 		}
-	} else {
-		*(bool*)ud = false;
 	}
 }
 
