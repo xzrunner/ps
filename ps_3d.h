@@ -153,7 +153,7 @@ struct p3d_emitter {
 void p3d_init();
 void p3d_regist_cb(void (*blend_begin_func)(int blend),
 				   void (*blend_end_func)(),
-				   void (*render_func)(void* spr, void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud, float time),
+				   void (*render_func)(void* spr, void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, int fast_blend, const void* ud, float time),
 				   void (*update_func)(void* spr, float x, float y),
 				   void (*add_func)(struct p3d_particle*, void* ud),
 				   void (*remove_func)(struct p3d_particle*, void* ud));

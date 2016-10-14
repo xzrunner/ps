@@ -22,7 +22,7 @@ static struct p3d_emitter*	EMITTER_ARRAY_HEAD	= NULL;
 
 static void (*BLEND_BEGIN_FUNC)(int blend);
 static void (*BLEND_END_FUNC)();
-static void (*RENDER_FUNC)(void* spr, void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud, float time);
+static void (*RENDER_FUNC)(void* spr, void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, int fast_blend, const void* ud, float time);
 static void (*UPDATE_FUNC)(void* spr, float x, float y);
 static void (*ADD_FUNC)(struct p3d_particle*, void* ud);
 static void (*REMOVE_FUNC)(struct p3d_particle*, void* ud);
@@ -52,7 +52,7 @@ p3d_init() {
 void 
 p3d_regist_cb(void (*blend_begin_func)(int blend),
 			  void (*blend_end_func)(),
-			  void (*render_func)(void* spr, void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud, float time),
+			  void (*render_func)(void* spr, void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, int fast_blend, const void* ud, float time),
 			  void (*update_func)(void* spr, float x, float y),
 			  void (*add_func)(struct p3d_particle*, void* ud),
 			  void (*remove_func)(struct p3d_particle*, void* ud)) {
@@ -480,7 +480,7 @@ p3d_emitter_draw(struct p3d_emitter* et, const void* ud) {
 			mul_col.a *= p->life / et->cfg->fadeout_time;
 		}
 
-		RENDER_FUNC(p->ud, p->cfg.sym->ud, p->mat, pos.x, pos.y, p->angle, scale, &mul_col, &add_col, ud, p->cfg.lifetime - p->life);
+		RENDER_FUNC(p->ud, p->cfg.sym->ud, p->mat, pos.x, pos.y, p->angle, scale, &mul_col, &add_col, et->cfg->blend, ud, p->cfg.lifetime - p->life);
 
 		p = p->next;
 	}
