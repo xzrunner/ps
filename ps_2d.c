@@ -290,8 +290,6 @@ p2d_emitter_update(struct p2d_emitter* et, float dt, float* mat) {
 	struct p2d_particle* prev = NULL;
 	struct p2d_particle* curr = et->head;
 	while (curr) {
-		et->tail = curr;
-
 		curr->life -= dt;
 		if (curr->life > 0) {
 			_update(et, dt, curr);
@@ -312,6 +310,7 @@ p2d_emitter_update(struct p2d_emitter* et, float dt, float* mat) {
 			curr = next;
 		}
 	}
+	et->tail = prev;
 }
 
 void 

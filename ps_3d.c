@@ -419,8 +419,6 @@ p3d_emitter_update(struct p3d_emitter* et, float dt, float* mat) {
 	struct p3d_particle* prev = NULL;
 	struct p3d_particle* curr = et->head;
 	while (curr) {
-		et->tail = curr;
-
 		if (curr->ud) {
 			struct ps_vec2 pos;
 			ps_vec3_projection(&curr->pos, &pos);
@@ -449,6 +447,7 @@ p3d_emitter_update(struct p3d_emitter* et, float dt, float* mat) {
 			curr = next;
 		}
 	}
+	et->tail = prev;
 }
 
 static inline void
