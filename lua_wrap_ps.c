@@ -76,6 +76,22 @@ lp3d_emitter_start(lua_State* L) {
 }
 
 static void inline
+_emitter_stop(struct sprite* spr, void* ud) {
+	assert(spr->type == TYPE_P3D_SPR);
+	if (spr->data_ext.p3d && spr->data_ext.p3d->et) {
+		p3d_emitter_stop(spr->data_ext.p3d->et);
+	}
+}
+
+static int
+lp3d_emitter_stop(lua_State* L) {
+	luaL_checktype(L, 1, LUA_TUSERDATA);
+	struct sprite* spr = (struct sprite*)lua_touserdata(L, 1);
+	_traverse_p3d(spr, _emitter_stop, NULL);
+	return 0;
+}
+
+static void inline
 _emitter_release(struct sprite* spr, void* ud) {
 	assert(spr->type == TYPE_P3D_SPR);
 	struct p3d_sprite* p3d = spr->data_ext.p3d;
@@ -234,6 +250,7 @@ luaopen_ps_c(lua_State* L) {
 		{ "p3d_emitter_update", lp3d_emitter_update },
 		{ "p3d_emitter_set_loop", lp3d_emitter_set_loop },
 		{ "p3d_emitter_is_finished", lp3d_emitter_is_finished },
+		{ "p3d_emitter_stop", lp3d_emitter_stop },
 
 		{ "p3d_sprite_set_local", lp3d_sprite_set_local },
 		{ "p3d_sprite_set_alone", lp3d_sprite_set_alone },
