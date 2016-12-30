@@ -422,7 +422,7 @@ p3d_emitter_update(struct p3d_emitter* et, float dt, float* mat) {
 		if (curr->ud) {
 			struct ps_vec2 pos;
 			ps_vec3_projection(&curr->pos, &pos);
-			UPDATE_FUNC(curr->ud, pos.x + mat[4], pos.y + mat[5]);
+			UPDATE_FUNC(curr->ud, pos.x, pos.y);
 		}
 
 		curr->life -= dt;
