@@ -347,8 +347,8 @@ _update_angle(struct p3d_emitter* et, float dt, struct p3d_particle* p) {
 		ps_vec3_projection(&pos, &pos_new);
 
 		// stop update angle when move slowly
-		if (fabs(pos_new.x - pos_old.x) < 1 &&
-			fabs(pos_new.y - pos_old.y) < 1) {
+		if (fabs(pos_new.x - pos_old.x) < 0.01f &&
+			fabs(pos_new.y - pos_old.y) < 0.01f) {
 			return;
 		}
 
