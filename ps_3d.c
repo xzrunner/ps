@@ -282,7 +282,11 @@ _update_disturbance_speed(struct p3d_emitter* et, float dt, struct p3d_particle*
 	struct ps_vec3 dis_dir;
 	dis_dir.x = p->dis_dir.x;
 	dis_dir.y = p->dis_dir.y;
-	dis_dir.z = - (p->cfg.spd_dir.x * dis_dir.x + p->cfg.spd_dir.y * dis_dir.y) / p->cfg.spd_dir.z;
+	if (p->cfg.spd_dir.z == 0) {
+		dis_dir.z = 0;
+	} else {
+		dis_dir.z = - (p->cfg.spd_dir.x * dis_dir.x + p->cfg.spd_dir.y * dis_dir.y) / p->cfg.spd_dir.z;
+	}
 	ps_vec3_normalize(&dis_dir);
 
 	float s = p->cfg.dis_spd * dt;
