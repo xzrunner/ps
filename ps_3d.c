@@ -19,6 +19,7 @@ static struct p3d_particle*	PARTICLE_ARRAY		= NULL;
 static struct p3d_particle*	PARTICLE_ARRAY_HEAD	= NULL;
 static struct p3d_emitter*	EMITTER_ARRAY		= NULL;
 static struct p3d_emitter*	EMITTER_ARRAY_HEAD	= NULL;
+static int p3d_disabled_flag = 0;
 
 static void (*BLEND_BEGIN_FUNC)(int blend);
 static void (*BLEND_END_FUNC)();
@@ -85,11 +86,25 @@ p3d_clear() {
 #endif // EMITTER_LOG
 }
 
+void
+p3d_set_disabled(int disabled) {
+    p3d_disabled_flag = disabled;
+}
+
 struct p3d_emitter* 
 p3d_emitter_create(const struct p3d_emitter_cfg* cfg) {
 	struct p3d_emitter* et;	
+	if (p3d_disabled_flag) {
+#ifdef EMITTER_LOG
+		LOGD("%s", "p3d disabled !!!! \n");
+#endif // EMITTER_LOG
+		return NULL;
+    }
 	PS_ARRAY_ALLOC(EMITTER_ARRAY, et);
 	if (!et) {
+#ifdef EMITTER_LOG
+		LOGD("%s", "add et failed !!!! \n");
+#endif // EMITTER_LOG
 		return NULL;
 	}
 #ifdef EMITTER_LOG
