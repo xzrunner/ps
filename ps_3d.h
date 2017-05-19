@@ -175,6 +175,9 @@ void p3d_emitter_draw(struct p3d_emitter*, const void* ud);
 
 bool p3d_emitter_is_finished(struct p3d_emitter*);
 
+// for debug
+int  p3d_emitter_count();
+
 #endif // particle_system_3d_h
 
 #ifdef __cplusplus

@@ -65,9 +65,7 @@ p3d_regist_cb(void (*blend_begin_func)(int blend),
 	REMOVE_FUNC			= remove_func;
 }
 
-#ifdef EMITTER_LOG
-static int et_count = 0;
-#endif // EMITTER_LOG
+static int ET_COUNT = 0;
 
 void 
 p3d_clear() {
@@ -81,9 +79,7 @@ p3d_clear() {
 	PS_ARRAY_INIT(EMITTER_ARRAY_HEAD, MAX_EMITTER_SZ);
     EMITTER_ARRAY = EMITTER_ARRAY_HEAD;
 
-#ifdef EMITTER_LOG
-	et_count = 0;
-#endif // EMITTER_LOG
+	ET_COUNT = 0;
 }
 
 void
@@ -107,9 +103,9 @@ p3d_emitter_create(const struct p3d_emitter_cfg* cfg) {
 #endif // EMITTER_LOG
 		return NULL;
 	}
+	++ET_COUNT;
 #ifdef EMITTER_LOG
-	++et_count;
-	LOGD("++ add et %d %p \n", et_count, et);
+	LOGD("++ add et %d %p \n", ET_COUNT, et);
 #endif // EMITTER_LOG
 	memset(et, 0, sizeof(struct p3d_emitter));
 	et->loop = true;
@@ -119,9 +115,9 @@ p3d_emitter_create(const struct p3d_emitter_cfg* cfg) {
 
 void 
 p3d_emitter_release(struct p3d_emitter* et) {
+	--ET_COUNT;
 #ifdef EMITTER_LOG
-	--et_count;
-	LOGD("-- del et %d %p\n", et_count, et);
+	LOGD("-- del et %d %p\n", ET_COUNT, et);
 #endif // EMITTER_LOG
 
 	p3d_emitter_clear(et);
@@ -513,4 +509,9 @@ p3d_emitter_is_finished(struct p3d_emitter* et) {
 	} else {
 		return !et->loop && et->particle_count >= et->cfg->count && !et->head;
 	}
+}
+
+int 
+p3d_emitter_count() {
+	return ET_COUNT;
 }
