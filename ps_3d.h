@@ -159,8 +159,6 @@ void p3d_regist_cb(void (*blend_begin_func)(int blend),
 				   void (*remove_func)(struct p3d_particle*, void* ud));
 void p3d_clear();
 
-void p3d_set_disabled(int disabled);
-
 struct p3d_emitter* p3d_emitter_create(const struct p3d_emitter_cfg* cfg);
 void p3d_emitter_release(struct p3d_emitter*);
 void p3d_emitter_clear(struct p3d_emitter*);
