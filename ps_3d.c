@@ -1,5 +1,6 @@
 #include "ps_3d.h"
 #include "ps_array.h"
+#include "imap.h"
 
 #include <logger.h>
 
@@ -11,6 +12,8 @@
 #define MAX_PARTICLE_SZ 10000
 #define MAX_EMITTER_SZ	2000
 
+#define EMITTER_LIFETIME (600) // 20 s * 30 FPS
+
 #define PI 3.1415926
 
 //#define EMITTER_LOG
@@ -20,6 +23,10 @@ static struct p3d_particle*	PARTICLE_ARRAY_HEAD	= NULL;
 static struct p3d_emitter*	EMITTER_ARRAY		= NULL;
 static struct p3d_emitter*	EMITTER_ARRAY_HEAD	= NULL;
 
+static int    s_next_id = 1;
+static int    s_tick = 0;
+static imap_t s_emitter_id2index;
+
 static void (*BLEND_BEGIN_FUNC)(int blend);
 static void (*BLEND_END_FUNC)();
 static void (*RENDER_FUNC)(void* spr, void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, int fast_blend, const void* ud, float time);
@@ -27,7 +34,7 @@ static void (*UPDATE_FUNC)(void* spr, float x, float y);
 static void (*ADD_FUNC)(struct p3d_particle*, void* ud);
 static void (*REMOVE_FUNC)(struct p3d_particle*, void* ud);
 
-void 
+void
 p3d_init() {
     if (!PARTICLE_ARRAY_HEAD) {
         int sz = sizeof(struct p3d_particle) * MAX_PARTICLE_SZ;
@@ -45,11 +52,11 @@ p3d_init() {
             return;
         }
     }
-    
+
 	p3d_clear();
 }
 
-void 
+void
 p3d_regist_cb(void (*blend_begin_func)(int blend),
 			  void (*blend_end_func)(),
 			  void (*render_func)(void* spr, void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, int fast_blend, const void* ud, float time),
@@ -66,51 +73,72 @@ p3d_regist_cb(void (*blend_begin_func)(int blend),
 
 static int ET_COUNT = 0;
 
-void 
+void
 p3d_clear() {
 	int sz = sizeof(struct p3d_particle) * MAX_PARTICLE_SZ;
 	memset(PARTICLE_ARRAY_HEAD, 0, sz);
 	PS_ARRAY_INIT(PARTICLE_ARRAY_HEAD, MAX_PARTICLE_SZ);
-    PARTICLE_ARRAY = PARTICLE_ARRAY_HEAD;
+	PARTICLE_ARRAY = PARTICLE_ARRAY_HEAD;
 
 	sz = sizeof(struct p3d_emitter) * MAX_EMITTER_SZ;
 	memset(EMITTER_ARRAY_HEAD, 0, sz);
-	PS_ARRAY_INIT(EMITTER_ARRAY_HEAD, MAX_EMITTER_SZ);
-    EMITTER_ARRAY = EMITTER_ARRAY_HEAD;
+	PS_ARRAY_INIT_WITH_INDEX(EMITTER_ARRAY_HEAD, MAX_EMITTER_SZ);
+	EMITTER_ARRAY = EMITTER_ARRAY_HEAD;
 
 	ET_COUNT = 0;
 }
 
-struct p3d_emitter* 
+static inline struct p3d_emitter*
+get_emitter(int emitter_id) {
+	int index;
+	if(!imap_get(&s_emitter_id2index, emitter_id, &index)) {
+		return NULL;
+	}
+	return EMITTER_ARRAY_HEAD + index;
+}
+
+void
+p3d_tick() {
+	s_tick++;
+}
+
+static void
+gc_aux(int emitter_id, int index) {
+	struct p3d_emitter* et = get_emitter(emitter_id);
+	if (et->expire <= s_tick) {
+		p3d_emitter_release(emitter_id);
+	}
+}
+
+void
+p3d_gc() {
+	imap_traverse(&s_emitter_id2index, gc_aux);
+}
+
+int
 p3d_emitter_create(const struct p3d_emitter_cfg* cfg) {
-	struct p3d_emitter* et;	
+	struct p3d_emitter* et;
 	PS_ARRAY_ALLOC(EMITTER_ARRAY, et);
 	if (!et) {
-		return NULL;
+		return 0;
 	}
 	++ET_COUNT;
 #ifdef EMITTER_LOG
 	LOGD("++ add et %d %p \n", ET_COUNT, et);
 #endif // EMITTER_LOG
+	int index = et->index;
 	memset(et, 0, sizeof(struct p3d_emitter));
+	et->index = index;
 	et->loop = true;
 	et->cfg = cfg;
-	return et;
+	et->expire = s_tick + EMITTER_LIFETIME;
+	int id = s_next_id++;
+	imap_set(&s_emitter_id2index, id, et->index);
+	return id;
 }
 
-void 
-p3d_emitter_release(struct p3d_emitter* et) {
-	--ET_COUNT;
-#ifdef EMITTER_LOG
-	LOGD("-- del et %d %p\n", ET_COUNT, et);
-#endif // EMITTER_LOG
-
-	p3d_emitter_clear(et);
-	PS_ARRAY_FREE(EMITTER_ARRAY, et);
-}
-
-void 
-p3d_emitter_clear(struct p3d_emitter* et) {
+static void
+emitter_clear(struct p3d_emitter* et) {
 	struct p3d_particle* p = et->head;
 	while (p) {
 		struct p3d_particle* next = p->next;
@@ -127,26 +155,55 @@ p3d_emitter_clear(struct p3d_emitter* et) {
 	et->particle_count = 0;
 }
 
-void 
-p3d_emitter_stop(struct p3d_emitter* et) {
+void
+p3d_emitter_release(int emitter_id) {
+	struct p3d_emitter* et = get_emitter(emitter_id);
+	if (!et) { return; }
+	--ET_COUNT;
+#ifdef EMITTER_LOG
+	LOGD("-- del et %d %p\n", ET_COUNT, et);
+#endif // EMITTER_LOG
+
+	imap_del(&s_emitter_id2index, emitter_id);
+	emitter_clear(et);
+	PS_ARRAY_FREE(EMITTER_ARRAY, et);
+}
+
+void
+p3d_emitter_clear(int emitter_id) {
+	struct p3d_emitter* et = get_emitter(emitter_id);
+	if (!et) { return; }
+	emitter_clear(et);
+}
+
+void
+p3d_emitter_stop(int emitter_id) {
+	struct p3d_emitter* et = get_emitter(emitter_id);
+	if (!et) { return; }
 	et->active = false;
 }
 
-void 
-p3d_emitter_start(struct p3d_emitter* et) {
+void
+p3d_emitter_start(int emitter_id) {
+	struct p3d_emitter* et = get_emitter(emitter_id);
+	if (!et) { return; }
 	et->particle_count = 0;
 	et->emit_counter = 0;
 	et->active = true;
 	et->static_mode_finished = false;
 }
 
-void 
-p3d_emitter_pause(struct p3d_emitter* et) {
+void
+p3d_emitter_pause(int emitter_id) {
+	struct p3d_emitter* et = get_emitter(emitter_id);
+	if (!et) { return; }
 	et->active = false;
 }
 
-void 
-p3d_emitter_resume(struct p3d_emitter* et) {
+void
+p3d_emitter_resume(int emitter_id) {
+	struct p3d_emitter* et = get_emitter(emitter_id);
+	if (!et) { return; }
 	et->active = true;
 }
 
@@ -178,7 +235,7 @@ _init_particle(struct p3d_emitter* et, struct p3d_particle* p, struct p3d_symbol
 
 	p->life = et->cfg->life + et->cfg->life_var * ps_random_m11(&RANDSEED);
 	p->cfg.lifetime = p->life;
-	
+
 	p->cfg.dir.x = et->cfg->hori + et->cfg->hori_var * ps_random_m11(&RANDSEED);
 	p->cfg.dir.y = et->cfg->vert + et->cfg->vert_var * ps_random_m11(&RANDSEED);
 
@@ -270,7 +327,7 @@ _update_disturbance_speed(struct p3d_emitter* et, float dt, struct p3d_particle*
 	}
 
 	// stop disturbance after touch the ground
-	if (et->cfg->ground != P3D_NO_GROUND && 
+	if (et->cfg->ground != P3D_NO_GROUND &&
 		fabs(p->pos.z) < 1) {
 		return;
 	}
@@ -335,7 +392,7 @@ _update_angle(struct p3d_emitter* et, float dt, struct p3d_particle* p) {
 	if (et->cfg->orient_to_movement) {
 		struct ps_vec2 pos_old, pos_new;
 		ps_vec3_projection(&p->pos, &pos_old);
-		
+
 		struct ps_vec3 pos;
 		for (int i = 0; i < 3; ++i) {
 			pos.xyz[i] = p->pos.xyz[i] + p->spd.xyz[i] * dt;
@@ -390,8 +447,20 @@ _update_position(struct p3d_emitter* et, float dt, struct p3d_particle* p) {
 	_update_with_ground(et, p);
 }
 
-void 
-p3d_emitter_update(struct p3d_emitter* et, float dt, float* mat) {
+bool
+p3d_emitter_check(int emitter_id) {
+	struct p3d_emitter* et = get_emitter(emitter_id);
+	if (!et) { return false; }
+	return true;
+}
+
+void
+p3d_emitter_update(int emitter_id, float dt, float* mat) {
+	struct p3d_emitter* et = get_emitter(emitter_id);
+	if (!et) { return ; }
+
+	et->expire = s_tick + EMITTER_LIFETIME;
+
 	if (et->active) {
 		float rate = et->cfg->emission_time / et->cfg->count;
 		et->emit_counter += dt;
@@ -458,10 +527,15 @@ _color_lerp(struct ps_color* begin, struct ps_color* end, struct ps_color* lerp,
 	lerp->a = proc * (end->a - begin->a) + begin->a;
 }
 
-void 
-p3d_emitter_draw(struct p3d_emitter* et, const void* ud) {
+void
+p3d_emitter_draw(int emitter_id, const void* ud) {
 	struct ps_vec2 pos;
 	struct ps_color mul_col, add_col;
+
+	struct p3d_emitter* et = get_emitter(emitter_id);
+	if (!et) { return ; }
+
+	et->expire = s_tick + EMITTER_LIFETIME;
 
 	BLEND_BEGIN_FUNC(et->cfg->blend);
 
@@ -487,8 +561,38 @@ p3d_emitter_draw(struct p3d_emitter* et, const void* ud) {
 	BLEND_END_FUNC();
 }
 
-bool 
-p3d_emitter_is_finished(struct p3d_emitter* et) {
+bool
+p3d_emitter_is_loop(int emitter_id) {
+	struct p3d_emitter* et = get_emitter(emitter_id);
+	if (!et) { return false; }
+	return et->loop;
+}
+
+void
+p3d_emitter_set_loop(int emitter_id, bool loop) {
+	struct p3d_emitter* et = get_emitter(emitter_id);
+	if (!et) { return; }
+	et->loop = loop;
+}
+
+bool p3d_emitter_get_time(int emitter_id, float* time) {
+	struct p3d_emitter* et = get_emitter(emitter_id);
+	if (!et) { return false; }
+	if(time) *time = et->time;
+	return true;
+}
+
+void p3d_emitter_set_time(int emitter_id, float time) {
+	struct p3d_emitter* et = get_emitter(emitter_id);
+	if (!et) { return; }
+	et->time = time;
+}
+
+bool
+p3d_emitter_is_finished(int emitter_id) {
+	struct p3d_emitter* et = get_emitter(emitter_id);
+	if (!et) { return true; }
+
 	if (et->cfg->static_mode) {
 		return !et->loop && et->static_mode_finished && !et->head;
 	} else {
@@ -496,7 +600,7 @@ p3d_emitter_is_finished(struct p3d_emitter* et) {
 	}
 }
 
-int 
+int
 p3d_emitter_count() {
 	return ET_COUNT;
 }

@@ -133,6 +133,8 @@ struct p3d_emitter {
 	// not static mode
 	float emit_counter;
 	int particle_count;
+	int index;
+	int expire;
 
 	// static mode
 	bool static_mode_finished;
@@ -158,20 +160,30 @@ void p3d_regist_cb(void (*blend_begin_func)(int blend),
 				   void (*add_func)(struct p3d_particle*, void* ud),
 				   void (*remove_func)(struct p3d_particle*, void* ud));
 void p3d_clear();
+void p3d_tick();
+void p3d_gc();
 
-struct p3d_emitter* p3d_emitter_create(const struct p3d_emitter_cfg* cfg);
-void p3d_emitter_release(struct p3d_emitter*);
-void p3d_emitter_clear(struct p3d_emitter*);
+// if no error occurs, it returns emitter id; otherwise it returns 0
+int p3d_emitter_create(const struct p3d_emitter_cfg* cfg);
+void p3d_emitter_release(int emitter_id);
+void p3d_emitter_clear(int emitter_id);
 
-void p3d_emitter_stop(struct p3d_emitter*);
-void p3d_emitter_start(struct p3d_emitter*);
-void p3d_emitter_pause(struct p3d_emitter*);
-void p3d_emitter_resume(struct p3d_emitter*);
+void p3d_emitter_stop(int emitter_id);
+void p3d_emitter_start(int emitter_id);
+void p3d_emitter_pause(int emitter_id);
+void p3d_emitter_resume(int emitter_id);
 
-void p3d_emitter_update(struct p3d_emitter*, float dt, float* mat);
-void p3d_emitter_draw(struct p3d_emitter*, const void* ud);
+bool p3d_emitter_check(int emitter_id);
+void p3d_emitter_update(int emitter_id, float dt, float* mat);
+void p3d_emitter_draw(int emitter_id, const void* ud);
 
-bool p3d_emitter_is_finished(struct p3d_emitter*);
+bool p3d_emitter_is_loop(int emitter_id);
+void p3d_emitter_set_loop(int emitter_id, bool loop);
+
+bool p3d_emitter_get_time(int emitter_id, float *time);
+void p3d_emitter_set_time(int emitter_id, float time);
+
+bool p3d_emitter_is_finished(int emitter_id);
 
 // for debug
 int  p3d_emitter_count();
