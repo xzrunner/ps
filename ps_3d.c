@@ -1,6 +1,5 @@
 #include "ps_3d.h"
 #include "ps_array.h"
-#include "imap.h"
 
 #include <logger.h>
 
@@ -8,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include "imap.h"
 
 #define MAX_PARTICLE_SZ 10000
 #define MAX_EMITTER_SZ	2000
