@@ -162,6 +162,7 @@ void p3d_regist_cb(void (*blend_begin_func)(int blend),
 void p3d_clear();
 void p3d_tick();
 void p3d_gc();
+void p3d_set_disabled(int disabled);
 
 // if no error occurs, it returns emitter id; otherwise it returns 0
 int p3d_emitter_create(const struct p3d_emitter_cfg* cfg);

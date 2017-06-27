@@ -27,6 +27,8 @@ static int    s_next_id = 1;
 static int    s_tick = 0;
 static imap_t s_emitter_id2index;
 
+static int    s_disabled_flag = 0;
+
 static void (*BLEND_BEGIN_FUNC)(int blend);
 static void (*BLEND_END_FUNC)();
 static void (*RENDER_FUNC)(void* spr, void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, int fast_blend, const void* ud, float time);
@@ -115,9 +117,18 @@ p3d_gc() {
 	imap_traverse(&s_emitter_id2index, gc_aux);
 }
 
+void
+p3d_set_disabled(int disabled) {
+	s_disabled_flag = disabled;
+}
+
 int
 p3d_emitter_create(const struct p3d_emitter_cfg* cfg) {
 	struct p3d_emitter* et;
+	if (s_disabled_flag) {
+		return 0;
+	}
+
 	PS_ARRAY_ALLOC(EMITTER_ARRAY, et);
 	if (!et) {
 		return 0;
