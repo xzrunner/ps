@@ -107,7 +107,7 @@ p3d_tick() {
 static void
 gc_aux(int emitter_id, int index) {
 	struct p3d_emitter* et = get_emitter(emitter_id);
-	if (et->expire <= s_tick) {
+	if (et && et->expire <= s_tick) {
 		p3d_emitter_release(emitter_id);
 	}
 }
