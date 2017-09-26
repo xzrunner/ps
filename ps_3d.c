@@ -14,7 +14,7 @@
 
 #define EMITTER_LIFETIME (600) // 20 s * 30 FPS
 
-#define PI 3.1415926
+#define PI 3.1415926f
 
 //#define EMITTER_LOG
 
@@ -532,10 +532,10 @@ p3d_emitter_update(int emitter_id, float dt, float* mat) {
 
 static inline void
 _color_lerp(struct ps_color* begin, struct ps_color* end, struct ps_color* lerp, float proc) {
-	lerp->r = proc * (end->r - begin->r) + begin->r;
-	lerp->g = proc * (end->g - begin->g) + begin->g;
-	lerp->b = proc * (end->b - begin->b) + begin->b;
-	lerp->a = proc * (end->a - begin->a) + begin->a;
+	lerp->r = (uint8_t)(proc * (end->r - begin->r) + begin->r);
+	lerp->g = (uint8_t)(proc * (end->g - begin->g) + begin->g);
+	lerp->b = (uint8_t)(proc * (end->b - begin->b) + begin->b);
+	lerp->a = (uint8_t)(proc * (end->a - begin->a) + begin->a);
 }
 
 void
@@ -561,7 +561,7 @@ p3d_emitter_draw(int emitter_id, const void* ud) {
 		_color_lerp(&p->cfg.sym->mul_col_begin, &p->cfg.sym->mul_col_end, &mul_col, proc);
 		_color_lerp(&p->cfg.sym->add_col_begin, &p->cfg.sym->add_col_end, &add_col, proc);
 		if (p->life < et->cfg->fadeout_time) {
-			mul_col.a *= p->life / et->cfg->fadeout_time;
+			mul_col.a = (uint8_t)(mul_col.a * p->life / et->cfg->fadeout_time);
 		}
 
 		RENDER_FUNC(p->ud, p->cfg.sym->ud, p->mat, pos.x, pos.y, p->angle, scale, &mul_col, &add_col, et->cfg->blend, ud, p->cfg.lifetime - p->life);

@@ -256,15 +256,15 @@ _update(struct p2d_emitter* et, float dt, struct p2d_particle* p) {
 
 	p->scale += p->scale_delta * dt;
 
-	p->mul_col.r += p->mul_col_delta.r * dt;
-	p->mul_col.g += p->mul_col_delta.g * dt;
-	p->mul_col.b += p->mul_col_delta.b * dt;
-	p->mul_col.a += p->mul_col_delta.a * dt;
+	p->mul_col.r += (uint8_t)(p->mul_col_delta.r * dt);
+	p->mul_col.g += (uint8_t)(p->mul_col_delta.g * dt);
+	p->mul_col.b += (uint8_t)(p->mul_col_delta.b * dt);
+	p->mul_col.a += (uint8_t)(p->mul_col_delta.a * dt);
 
-	p->add_col.r += p->add_col_delta.r * dt;
-	p->add_col.g += p->add_col_delta.g * dt;
-	p->add_col.b += p->add_col_delta.b * dt;
-	p->add_col.a += p->add_col_delta.a * dt;
+	p->add_col.r += (uint8_t)(p->add_col_delta.r * dt);
+	p->add_col.g += (uint8_t)(p->add_col_delta.g * dt);
+	p->add_col.b += (uint8_t)(p->add_col_delta.b * dt);
+	p->add_col.a += (uint8_t)(p->add_col_delta.a * dt);
 
 	if (et->cfg->mode_type == P2D_MODE_GRAVITY) {
 		_update_mode_gravity(et, dt, p);
