@@ -6,27 +6,17 @@ extern "C"
 #ifndef particle_system_array_h
 #define particle_system_array_h
 
-/*
-#define PS_ARRAY_INIT(buffer, type, n) { \
-	type* array = (type*)(buffer); \
-	for (int i = 0; i < (n) - 1; ++i) { \
-		array[i].next = &array[i + 1]; \
-	} \
-	array[(n) - 1].next = NULL; \
-}
-*/
+//#define PS_ARRAY_INIT(buffer, type, n) { \
+//	type* array = (type*)(buffer); \
+//	for (int i = 0; i < (n) - 1; ++i) { \
+//		array[i].next = &array[i + 1]; \
+//	} \
+//	array[(n) - 1].next = NULL; \
+//}
 
 #define PS_ARRAY_INIT(array, n) { \
 	for (int i = 0; i < (n) - 1; ++i) { \
 		array[i].next = &array[i + 1]; \
-	} \
-	array[(n) - 1].next = NULL; \
-}
-
-#define PS_ARRAY_INIT_WITH_INDEX(array, n) { \
-	for (int i = 0; i < (n) - 1; ++i) { \
-		array[i].next = &array[i + 1]; \
-        array[i].index = i; \
 	} \
 	array[(n) - 1].next = NULL; \
 }
