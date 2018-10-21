@@ -39,14 +39,14 @@ struct ps_color
 			uint8_t r;
 			uint8_t g;
 			uint8_t b;
-			uint8_t a;			
+			uint8_t a;
 		};
 
 		uint8_t rgba[4];
 	};
 };
 
-static inline void 
+static inline void
 ps_vec2_normalize(struct ps_vec2* p) {
 	float len2 = p->x * p->x + p->y * p->y;
 	if (len2 == 0) {
@@ -59,12 +59,12 @@ ps_vec2_normalize(struct ps_vec2* p) {
 	}
 }
 
-static inline float 
+static inline float
 ps_vec3_len(struct ps_vec3* p) {
 	return sqrtf(p->x * p->x + p->y * p->y + p->z * p->z);
 }
 
-static inline void 
+static inline void
 ps_vec3_normalize(struct ps_vec3* p) {
 	float len2 = p->x * p->x + p->y * p->y + p->z * p->z;
 	if (len2 == 0) {
@@ -78,7 +78,7 @@ ps_vec3_normalize(struct ps_vec3* p) {
 	}
 }
 
-static inline void 
+static inline void
 ps_vec3_projection(const struct ps_vec3* pos3, struct ps_vec2* pos2) {
 	float gx = pos3->x * 0.01f,
 		gy = pos3->y * 0.01f;
@@ -88,7 +88,7 @@ ps_vec3_projection(const struct ps_vec3* pos3, struct ps_vec2* pos2) {
 }
 
 static inline void
-ps_color_sub(const struct ps_color* start, const struct ps_color* end, 
+ps_color_sub(const struct ps_color* start, const struct ps_color* end,
 			 struct ps_color* ret) {
 	ret->r = end->r - start->r;
 	ret->g = end->g - start->g;
@@ -104,7 +104,7 @@ ps_color_mul(struct ps_color* ori, float mul) {
 	ori->a = (int)(ori->a * mul + 0.5f);
 }
 
-static inline float 
+static inline float
 ps_random_m11(unsigned int* seed) {
 	*seed = *seed * 134775813 + 1;
 	union {

@@ -16,7 +16,7 @@ static struct p2d_emitter*	EMITTER_ARRAY = NULL;
 
 static void (*RENDER_FUNC)(void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud);
 
-void 
+void
 p2d_init() {
 	int sz = sizeof(struct p2d_particle) * MAX_PARTICLE_SZ;
 	PARTICLE_ARRAY = (struct p2d_particle*)malloc(sz);
@@ -37,12 +37,12 @@ p2d_init() {
 	PS_ARRAY_INIT(EMITTER_ARRAY, MAX_EMITTER_SZ);
 }
 
-void 
+void
 p2d_regist_cb(void (*render_func)(void* sym, float* mat, float x, float y, float angle, float scale, struct ps_color* mul_col, struct ps_color* add_col, const void* ud)) {
-	RENDER_FUNC = render_func;	
+	RENDER_FUNC = render_func;
 }
 
-struct p2d_emitter* 
+struct p2d_emitter*
 p2d_emitter_create(const struct p2d_emitter_cfg* cfg) {
 	struct p2d_emitter* et;
 	PS_ARRAY_ALLOC(EMITTER_ARRAY, et);
@@ -55,13 +55,13 @@ p2d_emitter_create(const struct p2d_emitter_cfg* cfg) {
 	return et;
 }
 
-void 
+void
 p2d_emitter_release(struct p2d_emitter* et) {
 	p2d_emitter_clear(et);
 	free(et);
 }
 
-void 
+void
 p2d_emitter_clear(struct p2d_emitter* et) {
 	struct p2d_particle* p = et->head;
 	while (p) {
@@ -76,24 +76,24 @@ p2d_emitter_clear(struct p2d_emitter* et) {
 	et->particle_count = 0;
 }
 
-void 
+void
 p2d_emitter_stop(struct p2d_emitter* et) {
 	et->active = false;
 }
 
-void 
+void
 p2d_emitter_start(struct p2d_emitter* et) {
 	et->particle_count = 0;
 	et->emit_counter = 0;
 	et->active = true;
 }
 
-void 
+void
 p2d_emitter_pause(struct p2d_emitter* et) {
 	et->active = false;
 }
 
-void 
+void
 p2d_emitter_resume(struct p2d_emitter* et) {
 	et->active = true;
 }
@@ -275,7 +275,7 @@ _update(struct p2d_emitter* et, float dt, struct p2d_particle* p) {
 	}
 }
 
-void 
+void
 p2d_emitter_update(struct p2d_emitter* et, float dt, float* mat) {
 	if (et->active && (et->loop || et->particle_count < et->cfg->count)) {
 		float rate = et->cfg->emission_time / et->cfg->count;
@@ -313,7 +313,7 @@ p2d_emitter_update(struct p2d_emitter* et, float dt, float* mat) {
 	et->tail = prev;
 }
 
-void 
+void
 p2d_emitter_draw(struct p2d_emitter* et, const void* ud) {
 	struct p2d_particle* p = et->head;
 	while (p) {
@@ -322,7 +322,7 @@ p2d_emitter_draw(struct p2d_emitter* et, const void* ud) {
 	}
 }
 
-bool 
+bool
 p2d_emitter_is_finished(struct p2d_emitter* et) {
 	return !et->loop && et->particle_count >= et->cfg->count && !et->head;
 }

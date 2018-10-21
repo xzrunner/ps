@@ -110,7 +110,7 @@ struct p3d_emitter_cfg {
 	float fadeout_time;
 
 	int ground;
-	
+
 	float start_radius;
 	float start_height;
 
